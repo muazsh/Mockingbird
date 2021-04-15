@@ -139,9 +139,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Mockingbird.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Mockingbird.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

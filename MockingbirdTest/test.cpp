@@ -1,12 +1,11 @@
 #include "pch.h"
 
 #pragma region Legacy Code Assumption
-struct MyStruct
-{
+struct MyStruct{
 	int x, y;
 };
 
-class Foo {
+class Foo{
 public:
 	virtual void SetMyStruct(MyStruct& myStruct) = 0;
 	virtual const MyStruct CreateMyStruct(int x, int y) { return MyStruct{ x,y }; };
@@ -14,8 +13,7 @@ public:
 	virtual int GetTen() { return 10; }
 };
 
-MyStruct GetMyStructFoo(const std::unique_ptr<Foo>& foo, int x, int y) 
-{ 
+MyStruct GetMyStructFoo(const std::unique_ptr<Foo>& foo, int x, int y){ 
 	auto myStruct = foo->CreateMyStruct(x,y); 
 	foo->SetMyStruct(myStruct);
 	return foo->MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
@@ -35,8 +33,7 @@ CONST_METHOD_INJECTION_SET(MakeSpecialCopyMyStruct, MyStruct, (const std::shared
 END_MOCK(FooMock)
 #pragma endregion
 
-
-TEST(Mockingbird, VoidReturnReferenceSignature) {
+TEST(Mockingbird, VoidReturnReferenceSignature){
 	MyStruct myStruct{ 1, 1 };
 	FooMock fooMock;
 
@@ -46,8 +43,8 @@ TEST(Mockingbird, VoidReturnReferenceSignature) {
 	EXPECT_EQ(myStruct.x, 10);
 	EXPECT_EQ(myStruct.y, 10);
 }
-TEST(Mockingbird, ConstReturnPrimitivesSignature)
-{
+
+TEST(Mockingbird, ConstReturnPrimitivesSignature){
 	MyStruct myStruct{ 1, 1 };
 	FooMock fooMock;
 
@@ -58,8 +55,7 @@ TEST(Mockingbird, ConstReturnPrimitivesSignature)
 	EXPECT_EQ(createdMyStruct.y, 20);
 }
 
-TEST(Mockingbird, ConstMethodConstRefPointerSignature)
-{
+TEST(Mockingbird, ConstMethodConstRefPointerSignature){
 	MyStruct myStruct{ 1, 1 };
 	FooMock fooMock;
 
@@ -70,8 +66,7 @@ TEST(Mockingbird, ConstMethodConstRefPointerSignature)
 	EXPECT_EQ(specialCopy.y, 11);
 }
 
-TEST(Mockingbird, PassingMockPolymorphism)
-{
+TEST(Mockingbird, PassingMockPolymorphism){
 	MyStruct myStruct{ 1, 1 };
 	FooMock fooMock;
 
@@ -85,8 +80,7 @@ TEST(Mockingbird, PassingMockPolymorphism)
 	EXPECT_EQ(createdMyStruct2.y, 20);
 }
 
-TEST(Mockingbird, NoMock)
-{
+TEST(Mockingbird, NoMock){
 	FooMock fooMock;
 	EXPECT_EQ(fooMock.GetTen(), 10); // not injected so it returns the original value.
 }
