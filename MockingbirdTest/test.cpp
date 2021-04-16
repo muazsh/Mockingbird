@@ -36,9 +36,7 @@ END_MOCK(FooMock)
 TEST(Mockingbird, VoidReturnReferenceSignature){
 	MyStruct myStruct{ 1, 1 };
 	FooMock fooMock;
-
-	// Mocking methods injection.
-	fooMock.InjectSetMyStruct(&SetMyStructSubstitute);
+	fooMock.InjectSetMyStruct(&SetMyStructSubstitute); // Mocking methods injection.
 	fooMock.SetMyStruct(myStruct);
 	EXPECT_EQ(myStruct.x, 10);
 	EXPECT_EQ(myStruct.y, 10);
@@ -47,9 +45,7 @@ TEST(Mockingbird, VoidReturnReferenceSignature){
 TEST(Mockingbird, ConstReturnPrimitivesSignature){
 	MyStruct myStruct{ 1, 1 };
 	FooMock fooMock;
-
-	// Mocking methods injection.
-	fooMock.InjectCreateMyStruct(&CreateMyStructSubstitute);
+	fooMock.InjectCreateMyStruct(&CreateMyStructSubstitute); // Mocking methods injection.
 	auto createdMyStruct = fooMock.CreateMyStruct(10, 10);
 	EXPECT_EQ(createdMyStruct.x, 20);
 	EXPECT_EQ(createdMyStruct.y, 20);
@@ -58,9 +54,7 @@ TEST(Mockingbird, ConstReturnPrimitivesSignature){
 TEST(Mockingbird, ConstMethodConstRefPointerSignature){
 	MyStruct myStruct{ 1, 1 };
 	FooMock fooMock;
-
-	// Mocking methods injection.
-	fooMock.InjectMakeSpecialCopyMyStruct(&MakeSpecialCopyMyStructSubstitute);
+	fooMock.InjectMakeSpecialCopyMyStruct(&MakeSpecialCopyMyStructSubstitute); // Mocking methods injection.
 	auto specialCopy = fooMock.MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
 	EXPECT_EQ(specialCopy.x, 11);
 	EXPECT_EQ(specialCopy.y, 11);
@@ -83,4 +77,15 @@ TEST(Mockingbird, PassingMockPolymorphism){
 TEST(Mockingbird, NoMock){
 	FooMock fooMock;
 	EXPECT_EQ(fooMock.GetTen(), 10); // not injected so it returns the original value.
+}
+
+TEST(Mockingbird, CallsCount) {
+	MyStruct myStruct{ 1, 1 };
+	FooMock fooMock;
+	fooMock.InjectSetMyStruct(&SetMyStructSubstitute); // Mocking methods injection.
+	EXPECT_EQ(fooMock.GetSetMyStructCallCounter(), 0);
+	fooMock.SetMyStruct(myStruct);
+	EXPECT_EQ(fooMock.GetSetMyStructCallCounter(), 1);
+	fooMock.SetMyStruct(myStruct);
+	EXPECT_EQ(fooMock.GetSetMyStructCallCounter(), 2);
 }
