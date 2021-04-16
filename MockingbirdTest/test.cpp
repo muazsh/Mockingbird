@@ -11,6 +11,7 @@ public:
 	virtual const MyStruct CreateMyStruct(int x, int y) { return MyStruct{ x,y }; };
 	virtual const MyStruct CreateMyStruct(int x) { return MyStruct{ x,x }; };
 	virtual MyStruct MakeSpecialCopyMyStruct(const std::shared_ptr<MyStruct>& myStruct) const { return MyStruct{ myStruct->x, myStruct->y }; }
+	virtual MyStruct MakeSpecialCopyMyStruct(const MyStruct& myStruct) const { return MyStruct{ myStruct.x, myStruct.y }; }
 	virtual int GetTen() { return 10; }
 };
 
@@ -27,12 +28,14 @@ void SetMyStructSubstitute(MyStruct& myStruct) { myStruct.x = 10; myStruct.y = 1
 const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
 const MyStruct CreateMyStructSubstitute2(int x) { return MyStruct{ x + 5, x + 5 }; }
 MyStruct MakeSpecialCopyMyStructSubstitute(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ myStruct->x + 10, myStruct->y + 10 }; } // This is a static method wihch cannot be const
+MyStruct MakeSpecialCopyMyStructSubstitute2(const MyStruct& myStruct) { return MyStruct{ myStruct.x + 15, myStruct.y + 15 }; }
 
 START_MOCK(FooMock, Foo)
 METHOD_INJECTION_SET(SetMyStruct, void, (MyStruct& myStruct), &SetMyStructSubstitute, myStruct)
 METHOD_INJECTION_SET(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructSubstitute, x, y)
 METHOD_OVERLOAD_INJECTION_SET(CreateMyStruct, const MyStruct, (int x), &CreateMyStructSubstitute2, 1, x)
 CONST_METHOD_INJECTION_SET(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct), &MakeSpecialCopyMyStructSubstitute, myStruct)
+CONST_METHOD_OVERLOAD_INJECTION_SET(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct), &MakeSpecialCopyMyStructSubstitute2, 1, myStruct)
 END_MOCK(FooMock)
 #pragma endregion
 
@@ -74,6 +77,19 @@ TEST(Mockingbird, ConstMethodConstRefPointerSignature){
 	auto specialCopy = fooMock.MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
 	EXPECT_EQ(specialCopy.x, 11);
 	EXPECT_EQ(specialCopy.y, 11);
+}
+
+TEST(Mockingbird, OverloadConstMethod) {
+	MyStruct myStruct{ 1, 1 };
+	FooMock fooMock;
+	fooMock.InjectMakeSpecialCopyMyStruct(&MakeSpecialCopyMyStructSubstitute); // Mocking methods injection.
+	auto specialCopy = fooMock.MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
+	EXPECT_EQ(specialCopy.x, 11);
+	EXPECT_EQ(specialCopy.y, 11);
+	fooMock.InjectMakeSpecialCopyMyStruct(&MakeSpecialCopyMyStructSubstitute2); // Mocking methods injection.
+	auto specialCopy2 = fooMock.MakeSpecialCopyMyStruct(myStruct);
+	EXPECT_EQ(specialCopy2.x, 16);
+	EXPECT_EQ(specialCopy2.y, 16);
 }
 
 TEST(Mockingbird, PassingMockPolymorphism){
