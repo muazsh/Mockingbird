@@ -7,7 +7,7 @@ struct MyStruct{
 
 class Foo{
 public:
-	virtual void SetMyStruct(MyStruct& myStruct) = 0;
+	virtual void ReSetMyStruct(MyStruct& myStruct) = 0;
 	virtual const MyStruct CreateMyStruct(int x, int y) { return MyStruct{ x,y }; };
 	virtual const MyStruct CreateMyStruct(int x) { return MyStruct{ x,x }; };
 	virtual MyStruct MakeSpecialCopyMyStruct(const std::shared_ptr<MyStruct>& myStruct) const { return MyStruct{ myStruct->x, myStruct->y }; }
@@ -17,21 +17,21 @@ public:
 
 MyStruct GetMyStructFoo(const std::unique_ptr<Foo>& foo, int x, int y){ 
 	auto myStruct = foo->CreateMyStruct(x,y); 
-	foo->SetMyStruct(myStruct);
+	foo->ReSetMyStruct(myStruct);
 	return foo->MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
 }
 
 #pragma endregion
 
 #pragma region Mocking Fixture
-void SetMyStructSubstitute(MyStruct& myStruct) { myStruct.x = 10; myStruct.y = 10; }
+void ReSetMyStructSubstitute(MyStruct& myStruct) { myStruct.x = 10; myStruct.y = 10; }
 const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
 const MyStruct CreateMyStructSubstitute2(int x) { return MyStruct{ x + 5, x + 5 }; }
 MyStruct MakeSpecialCopyMyStructSubstitute(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ myStruct->x + 10, myStruct->y + 10 }; } // This is a static method wihch cannot be const
 MyStruct MakeSpecialCopyMyStructSubstitute2(const MyStruct& myStruct) { return MyStruct{ myStruct.x + 15, myStruct.y + 15 }; }
 
 START_MOCK(FooMock, Foo)
-METHOD_INJECTION_SET(SetMyStruct, void, (MyStruct& myStruct), &SetMyStructSubstitute, myStruct)
+METHOD_INJECTION_SET(ReSetMyStruct, void, (MyStruct& myStruct), &ReSetMyStructSubstitute, myStruct)
 METHOD_INJECTION_SET(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructSubstitute, x, y)
 METHOD_OVERLOAD_INJECTION_SET(CreateMyStruct, const MyStruct, (int x), &CreateMyStructSubstitute2, 1, x)
 CONST_METHOD_INJECTION_SET(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct), &MakeSpecialCopyMyStructSubstitute, myStruct)
@@ -42,8 +42,8 @@ END_MOCK(FooMock)
 TEST(Mockingbird, VoidReturnReferenceSignature){
 	MyStruct myStruct{ 1, 1 };
 	FooMock fooMock;
-	fooMock.InjectSetMyStruct(&SetMyStructSubstitute); // Mocking methods injection.
-	fooMock.SetMyStruct(myStruct);
+	fooMock.InjectReSetMyStruct(&ReSetMyStructSubstitute); // Mocking methods injection.
+	fooMock.ReSetMyStruct(myStruct);
 	EXPECT_EQ(myStruct.x, 10);
 	EXPECT_EQ(myStruct.y, 10);
 }
@@ -97,7 +97,7 @@ TEST(Mockingbird, PassingMockPolymorphism){
 	FooMock fooMock;
 
 	// Mocking methods injection.
-	fooMock.InjectSetMyStruct(&SetMyStructSubstitute);
+	fooMock.InjectReSetMyStruct(&ReSetMyStructSubstitute);
 	fooMock.InjectCreateMyStruct(&CreateMyStructSubstitute);
 	fooMock.InjectMakeSpecialCopyMyStruct(&MakeSpecialCopyMyStructSubstitute);
 
@@ -108,16 +108,16 @@ TEST(Mockingbird, PassingMockPolymorphism){
 
 TEST(Mockingbird, NoMock){
 	FooMock fooMock;
-	EXPECT_EQ(fooMock.GetTen(), 10); // not injected so it returns the original value.
+	EXPECT_EQ(fooMock.GetTen(), 10); // not injected so it returns the value of the base class.
 }
 
 TEST(Mockingbird, CallsCount) {
 	MyStruct myStruct{ 1, 1 };
 	FooMock fooMock;
-	fooMock.InjectSetMyStruct(&SetMyStructSubstitute); // Mocking methods injection.
-	EXPECT_EQ(fooMock.GetSetMyStructCallCounter(), 0);
-	fooMock.SetMyStruct(myStruct);
-	EXPECT_EQ(fooMock.GetSetMyStructCallCounter(), 1);
-	fooMock.SetMyStruct(myStruct);
-	EXPECT_EQ(fooMock.GetSetMyStructCallCounter(), 2);
+	fooMock.InjectReSetMyStruct(&ReSetMyStructSubstitute); // Mocking methods injection.
+	EXPECT_EQ(fooMock.GetReSetMyStructCallCounter(), 0);
+	fooMock.ReSetMyStruct(myStruct);
+	EXPECT_EQ(fooMock.GetReSetMyStructCallCounter(), 1);
+	fooMock.ReSetMyStruct(myStruct);
+	EXPECT_EQ(fooMock.GetReSetMyStructCallCounter(), 2);
 }
