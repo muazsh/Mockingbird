@@ -22,13 +22,13 @@ int Get##FuncName##CallCounter(){return m_##FuncName##CallCounter;}
 
 #define FUNCTION(FuncName,ReturnType, Signature, Substitute, .../*signature variables*/)\
 INJECTION_SET(FuncName, Substitute)\
-ReturnType FuncName##Signature override\
+ReturnType FuncName Signature override\
 { m_##FuncName##CallCounter++;\
 return m_##FuncName##Class.m_func(__VA_ARGS__);}
 
 #define CONST_FUNCTION(FuncName,ReturnType, Signature, Substitute, .../*signature variables*/)\
 INJECTION_SET(FuncName, Substitute)\
-ReturnType FuncName##Signature const override\
+ReturnType FuncName Signature const override\
 { m_##FuncName##CallCounter++;\
 return m_##FuncName##Class.m_func(__VA_ARGS__);}
 
@@ -43,13 +43,13 @@ int Get##FuncName##overloadedMethodNumber##CallCounter(){return m_##FuncName##Ca
 
 #define FUNCTION_OVERLOADING(FuncName,ReturnType, Signature, Substitute, overloadedMethodNumber, .../*signature variables*/)\
 OVERLOAD_INJECTION_SET(FuncName, Substitute, overloadedMethodNumber)\
-ReturnType FuncName##Signature override\
+ReturnType FuncName Signature override\
 { m_##FuncName##overloadedMethodNumber##CallCounter++;\
 return m_##FuncName##Class##overloadedMethodNumber.m_func(__VA_ARGS__);}
 
 #define CONST_FUNCTION_OVERLOADING(FuncName,ReturnType, Signature, Substitute, overloadedMethodNumber, .../*signature variables*/)\
 OVERLOAD_INJECTION_SET(FuncName, Substitute, overloadedMethodNumber)\
-ReturnType FuncName##Signature const override\
+ReturnType FuncName Signature const override\
 { m_##FuncName##overloadedMethodNumber##CallCounter++;\
 return m_##FuncName##Class##overloadedMethodNumber.m_func(__VA_ARGS__);}
 
