@@ -97,3 +97,28 @@ TEST(Mockingbird, CallsCount) {
 	fooMock.ResetMyStruct(myStruct);
 	EXPECT_EQ(fooMock.GetResetMyStructCallCounter(), 2);
 }
+
+TEST(Mockingbird, DefaultDummyFunctions) {
+	MyStruct myStruct{ 4,4 };
+	FooMock fooMock;
+
+	auto createdMyStruct = fooMock.CreateMyStruct(10, 10);
+	EXPECT_EQ(createdMyStruct.x, 0);
+	EXPECT_EQ(createdMyStruct.y, 0);
+
+	createdMyStruct = fooMock.CreateMyStruct(9);
+	EXPECT_EQ(createdMyStruct.x, 0);
+	EXPECT_EQ(createdMyStruct.y, 0);
+
+	createdMyStruct = fooMock.MakeSpecialCopyMyStruct(myStruct);
+	EXPECT_EQ(createdMyStruct.x, 0);
+	EXPECT_EQ(createdMyStruct.y, 0);
+
+	createdMyStruct = fooMock.MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
+	EXPECT_EQ(createdMyStruct.x, 0);
+	EXPECT_EQ(createdMyStruct.y, 0);
+	
+	fooMock.ResetMyStruct(myStruct);
+	EXPECT_EQ(createdMyStruct.x, 0);
+	EXPECT_EQ(createdMyStruct.y, 0);
+}

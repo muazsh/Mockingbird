@@ -4,10 +4,10 @@
 #include "Mockingbird.hpp"
 
 void ResetMyStructDummy(MyStruct& myStruct) {}
-const MyStruct CreateMyStructDummy(int x, int y) { return MyStruct(); }
-const MyStruct CreateMyStructDummy2(int x) { return MyStruct(); }
-MyStruct MakeSpecialCopyMyStructDummy(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct(); } // This is a static method wihch cannot be const
-MyStruct MakeSpecialCopyMyStructDummy2(const MyStruct& myStruct) { return MyStruct(); }
+const MyStruct CreateMyStructDummy(int x, int y) { return MyStruct{ 0,0 }; }
+const MyStruct CreateMyStructDummy2(int x) { return MyStruct{ 0,0 }; }
+MyStruct MakeSpecialCopyMyStructDummy(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ 0,0 }; } // This is a static method wihch cannot be const
+MyStruct MakeSpecialCopyMyStructDummy2(const MyStruct& myStruct) { return MyStruct{ 0,0 }; }
 
 START_MOCK(FooMock, Foo)
 FUNCTION(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructDummy, myStruct)

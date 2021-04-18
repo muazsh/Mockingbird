@@ -7,12 +7,13 @@ class MockingClass : public MockedClass {\
  public: 
 
 #define INJECTION_SET(FuncName, Substitute)\
+private:\
 template<class T>\
 class FuncName##Class {\
 public:\
+FuncName##Class(){m_func = (T)Substitute;}\
 T m_func;\
 };\
-private:\
 FuncName##Class<decltype(Substitute)> m_##FuncName##Class;\
 mutable int m_##FuncName##CallCounter = 0;\
 public:\
