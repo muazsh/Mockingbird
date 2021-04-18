@@ -1,6 +1,6 @@
 # Mockingbird
 
-:white_check_mark: All compilers with c++11 and higher are supported: [Choose a compiler to build](https://godbolt.org/z/r8rT14K1Y)
+:white_check_mark: All compilers with c++11 and higher are supported: [Choose a compiler to build](https://godbolt.org/z/TKbG44Pra)
 
 Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework and it provides mocking overloaded methods and counting number of calls of a mocked method.
 
@@ -83,6 +83,6 @@ fooMock.InjectMakeSpecialCopyMyStruct(MakeSpecialCopyMyStructSubstitute); // Moc
 auto specialCopy = fooMock.MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
 ```
 
-**Note**: For a mocked method if a substitute is not injected there will be no compilation failure but a run time error when the mocked method is called.
+**Note**: For a mocked method if a substitute is not injected the default behavior will be the behaviour of the dummy function in the fixture.
 
 
