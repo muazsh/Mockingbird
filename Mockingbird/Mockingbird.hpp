@@ -11,7 +11,7 @@ private:\
 template<class T>\
 class FuncName##Class {\
 public:\
-FuncName##Class(){m_func = (T)Substitute;}\
+FuncName##Class():m_func((T)Substitute){}\
 T m_func;\
 };\
 FuncName##Class<decltype(Substitute)> m_##FuncName##Class;\
