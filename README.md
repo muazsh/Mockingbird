@@ -67,7 +67,7 @@ END_MOCK(FooMock)
 When calling one of `FUNCTION` macros note that when passing the signature arguments names at the end, they must be same as the names in the passed signature, so in case of ` CreateMyStruct ` `x,y` in the end are named same as in signature argument `(int x, int y)`.
 Also note when mocking an overloaded method, the passed number N will show up in the method `GetFxNCallCounter` to distinguish what overloaded method calls number is wanted.
 
-In the tests a function should be introduced for each method wanted to get mocked:
+In the tests a substitute function should be introduced for each method wanted to get mocked:
 ``` c++
 void ResetMyStructSubstitute(MyStruct& myStruct) { myStruct.x = 10; myStruct.y = 10; }
 const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
@@ -79,7 +79,7 @@ Finally substitutes need to be injected into an instance of `MockFoo` which can 
 ``` c++
 MyStruct myStruct{ 1, 1 };
 FooMock fooMock;
-fooMock.InjectMakeSpecialCopyMyStruct(&MakeSpecialCopyMyStructSubstitute); // Mocking methods injection.
+fooMock.InjectMakeSpecialCopyMyStruct(MakeSpecialCopyMyStructSubstitute); // Mocking methods injection.
 auto specialCopy = fooMock.MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
 ```
 
