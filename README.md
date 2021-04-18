@@ -1,6 +1,6 @@
 # Mockingbird
 
-:white_check_mark: All compilers with c++11 and higher are supported: [Choose a compiler to build](https://godbolt.org/z/83qfsb5nr)
+:white_check_mark: All compilers with c++11 and higher are supported: [Choose a compiler to build](https://godbolt.org/z/r8rT14K1Y)
 
 Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework and it provides mocking overloaded methods and counting number of calls of a mocked method.
 
@@ -48,7 +48,26 @@ public:
 	virtual int GetTen() { return 10; }
 }; 
 ```
-Assuming all methods except of `GetTen` are to be mocked, then a substitute function should be introduced for each method wanted to get mocked:
+Assuming all methods except of `GetTen` are to be mocked, then a test fixture for the class `Foo` should be intorduced using **Mockingbird** macros and dummy versions of methods to be mocked, this fixture gets written only once for a project where `Foo` appears in tests as a mock:
+```c++
+void ResetMyStructDummy(MyStruct& myStruct) {}
+const MyStruct CreateMyStructDummy(int x, int y) { return MyStruct(); }
+const MyStruct CreateMyStructDummy2(int x) { return MyStruct(); }
+MyStruct MakeSpecialCopyMyStructDummy(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct(); } // This is a static method wihch cannot be const
+MyStruct MakeSpecialCopyMyStructDummy2(const MyStruct& myStruct) { return MyStruct(); }
+
+START_MOCK(FooMock, Foo)
+FUNCTION(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructDummy, myStruct)
+FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDummy, x, y)
+FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy2, 1, x)
+CONST_FUNCTION(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct), &MakeSpecialCopyMyStructDummy, myStruct)
+CONST_FUNCTION_OVERLOADING(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct), &MakeSpecialCopyMyStructDummy2, 1, myStruct)
+END_MOCK(FooMock)
+```
+When calling one of `FUNCTION` macros note that when passing the signature arguments names at the end, they must be same as the names in the passed signature, so in case of ` CreateMyStruct ` `x,y` in the end are named same as in signature argument `(int x, int y)`.
+Also note when mocking an overloaded method, the passed number N will show up in the method `GetFxNCallCounter` to distinguish what overloaded method calls number is wanted.
+
+In the tests a substitute function should be introduced for each method wanted to get mocked:
 ``` c++
 void ResetMyStructSubstitute(MyStruct& myStruct) { myStruct.x = 10; myStruct.y = 10; }
 const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
@@ -56,24 +75,11 @@ const MyStruct CreateMyStructSubstitute2(int x) { return MyStruct{ x + 5, x + 5 
 MyStruct MakeSpecialCopyMyStructSubstitute(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ myStruct->x + 10, myStruct->y + 10 }; }
 MyStruct MakeSpecialCopyMyStructSubstitute2(const MyStruct& myStruct) { return MyStruct{ myStruct.x + 15, myStruct.y + 15 }; }
 ```
- Now I create a mocking class using Mockingbird macros:
-``` c++
-START_MOCK(FooMock, Foo)
-FUNCTION(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructSubstitute, myStruct)
-FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructSubstitute, x, y)
-FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructSubstitute2, 1, x)
-CONST_FUNCTION(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct), &MakeSpecialCopyMyStructSubstitute, myStruct)
-CONST_FUNCTION_OVERLOADING(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct), &MakeSpecialCopyMyStructSubstitute2, 1, myStruct)
-END_MOCK(FooMock)
-```
-When calling one of `FUNCTION` macros note that when passing the signature arguments names at the end, they must be same as the names in the passed signature, so in case of ` CreateMyStruct ` `x,y` in the end are named same as in signature argument `(int x, int y)`.
-Also note when mocking an overloaded method, the passed number N will show up in the method `GetFxNCallCounter` to distinguish what overloaded method calls number is wanted.
-
 Finally substitutes need to be injected into an instance of `MockFoo` which can be used as if it is of a `Foo` class like:
 ``` c++
 MyStruct myStruct{ 1, 1 };
 FooMock fooMock;
-fooMock.InjectMakeSpecialCopyMyStruct(&MakeSpecialCopyMyStructSubstitute); // Mocking methods injection.
+fooMock.InjectMakeSpecialCopyMyStruct(MakeSpecialCopyMyStructSubstitute); // Mocking methods injection.
 auto specialCopy = fooMock.MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
 ```
 
