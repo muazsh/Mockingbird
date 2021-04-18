@@ -1,43 +1,11 @@
 #include "pch.h"
+#include "FooTestFixture.h"
 
-#pragma region Legacy Code Assumption
-struct MyStruct{
-	int x, y;
-};
-
-class Foo{
-public:
-	virtual void ResetMyStruct(MyStruct& myStruct) = 0;
-	virtual const MyStruct CreateMyStruct(int x, int y) { return MyStruct{ x,y }; };
-	virtual const MyStruct CreateMyStruct(int x) { return MyStruct{ x,x }; };
-	virtual MyStruct MakeSpecialCopyMyStruct(const std::shared_ptr<MyStruct>& myStruct) const { return MyStruct{ myStruct->x, myStruct->y }; }
-	virtual MyStruct MakeSpecialCopyMyStruct(const MyStruct& myStruct) const { return MyStruct{ myStruct.x, myStruct.y }; }
-	virtual int GetTen() { return 10; }
-};
-
-MyStruct GetMyStructFoo(const std::unique_ptr<Foo>& foo, int x, int y){ 
-	auto myStruct = foo->CreateMyStruct(x,y); 
-	foo->ResetMyStruct(myStruct);
-	return foo->MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
-}
-
-#pragma endregion
-
-#pragma region Mocking Fixture
 void ResetMyStructSubstitute(MyStruct& myStruct) { myStruct.x = 10; myStruct.y = 10; }
 const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
 const MyStruct CreateMyStructSubstitute2(int x) { return MyStruct{ x + 5, x + 5 }; }
 MyStruct MakeSpecialCopyMyStructSubstitute(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ myStruct->x + 10, myStruct->y + 10 }; } // This is a static method wihch cannot be const
 MyStruct MakeSpecialCopyMyStructSubstitute2(const MyStruct& myStruct) { return MyStruct{ myStruct.x + 15, myStruct.y + 15 }; }
-
-START_MOCK(FooMock, Foo)
-FUNCTION(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructSubstitute, myStruct)
-FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructSubstitute, x, y)
-FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructSubstitute2, 1, x)
-CONST_FUNCTION(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct), &MakeSpecialCopyMyStructSubstitute, myStruct)
-CONST_FUNCTION_OVERLOADING(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct), &MakeSpecialCopyMyStructSubstitute2, 1, myStruct)
-END_MOCK(FooMock)
-#pragma endregion
 
 TEST(Mockingbird, VoidReturnReferenceSignature){
 	MyStruct myStruct{ 1, 1 };

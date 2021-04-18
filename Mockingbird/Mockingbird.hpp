@@ -16,8 +16,8 @@ private:\
 FuncName##Class<decltype(Substitute)> m_##FuncName##Class;\
 mutable int m_##FuncName##CallCounter = 0;\
 public:\
-void Inject##FuncName(decltype(Substitute)){\
-m_##FuncName##Class.m_func = Substitute;}\
+void Inject##FuncName(decltype(Substitute) sub){\
+m_##FuncName##Class.m_func = sub;}\
 int Get##FuncName##CallCounter(){return m_##FuncName##CallCounter;}
 
 #define FUNCTION(FuncName,ReturnType, Signature, Substitute, .../*signature variables*/)\
@@ -37,8 +37,8 @@ private:\
 FuncName##Class<decltype(Substitute)> m_##FuncName##Class##overloadedMethodNumber;\
 mutable int m_##FuncName##overloadedMethodNumber##CallCounter = 0;\
 public:\
-void Inject##FuncName(decltype(Substitute)){\
-m_##FuncName##Class##overloadedMethodNumber.m_func = Substitute;}\
+void Inject##FuncName(decltype(Substitute) sub){\
+m_##FuncName##Class##overloadedMethodNumber.m_func = sub;}\
 int Get##FuncName##overloadedMethodNumber##CallCounter(){return m_##FuncName##CallCounter;}
 
 #define FUNCTION_OVERLOADING(FuncName,ReturnType, Signature, Substitute, overloadedMethodNumber, .../*signature variables*/)\
