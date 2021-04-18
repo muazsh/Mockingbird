@@ -1,6 +1,6 @@
 # Mockingbird
 
-All compilers with c++11 and higher are supported: [Choose a compiler to build](https://godbolt.org/z/83qfsb5nr)
+:white_check_mark: All compilers with c++11 and higher are supported: [Choose a compiler to build](https://godbolt.org/z/83qfsb5nr)
 
 Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework and it provides mocking overloaded methods and counting number of calls of a mocked method.
 
