@@ -1,3 +1,10 @@
+/*
+ *  Mockingbird is a simple and a powerful mocking framework for c++.
+ *  Copyright (c) Mouaz Chamieh April 2021.
+ *  Distributed under the MIT License. Please refer to the LICENSE file at:
+ *  https://github.com/muazsh/Mockingbird
+ */
+
 #pragma once
 #ifndef MOCKINGBIRD
 #define MOCKINGBIRD

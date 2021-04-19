@@ -13,8 +13,8 @@ TEST(Mockingbird, VoidReturnReferenceSignature){
 
 	fooMock.InjectResetMyStruct(ResetMyStructSubstitute); // Mocking methods injection.
 	fooMock.ResetMyStruct(myStruct);
-	EXPECT_EQ(myStruct.x, 10);
-	EXPECT_EQ(myStruct.y, 10);
+	EXPECT_EQ(10, myStruct.x);
+	EXPECT_EQ(10, myStruct.y);
 }
 
 TEST(Mockingbird, ConstReturnPrimitivesSignature){
@@ -23,8 +23,8 @@ TEST(Mockingbird, ConstReturnPrimitivesSignature){
 
 	fooMock.InjectCreateMyStruct(CreateMyStructSubstitute); // Mocking methods injection.
 	auto createdMyStruct = fooMock.CreateMyStruct(10, 10);
-	EXPECT_EQ(createdMyStruct.x, 20);
-	EXPECT_EQ(createdMyStruct.y, 20);
+	EXPECT_EQ(20, createdMyStruct.x);
+	EXPECT_EQ(20, createdMyStruct.y);
 }
 
 TEST(Mockingbird, Overloading) {
@@ -33,13 +33,13 @@ TEST(Mockingbird, Overloading) {
 
 	fooMock.InjectCreateMyStruct(CreateMyStructSubstitute); // Mocking methods injection.
 	auto createdMyStruct1 = fooMock.CreateMyStruct(10, 10);
-	EXPECT_EQ(createdMyStruct1.x, 20);
-	EXPECT_EQ(createdMyStruct1.y, 20);
+	EXPECT_EQ(20, createdMyStruct1.x);
+	EXPECT_EQ(20, createdMyStruct1.y);
 
 	fooMock.InjectCreateMyStruct(CreateMyStructSubstitute2); // Mocking methods injection.
 	auto createdMyStruct2 = fooMock.CreateMyStruct(0);
-	EXPECT_EQ(createdMyStruct2.x, 5);
-	EXPECT_EQ(createdMyStruct2.y, 5);
+	EXPECT_EQ(5, createdMyStruct2.x);
+	EXPECT_EQ(5, createdMyStruct2.y);
 }
 
 TEST(Mockingbird, ConstMethodConstRefPointerSignature){
@@ -48,8 +48,8 @@ TEST(Mockingbird, ConstMethodConstRefPointerSignature){
 
 	fooMock.InjectMakeSpecialCopyMyStruct(MakeSpecialCopyMyStructSubstitute); // Mocking methods injection.
 	auto specialCopy = fooMock.MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
-	EXPECT_EQ(specialCopy.x, 11);
-	EXPECT_EQ(specialCopy.y, 11);
+	EXPECT_EQ(11, specialCopy.x);
+	EXPECT_EQ(11, specialCopy.y);
 }
 
 TEST(Mockingbird, OverloadConstMethod) {
@@ -58,13 +58,13 @@ TEST(Mockingbird, OverloadConstMethod) {
 
 	fooMock.InjectMakeSpecialCopyMyStruct(MakeSpecialCopyMyStructSubstitute); // Mocking methods injection.
 	auto specialCopy = fooMock.MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
-	EXPECT_EQ(specialCopy.x, 11);
-	EXPECT_EQ(specialCopy.y, 11);
+	EXPECT_EQ(11, specialCopy.x);
+	EXPECT_EQ(11, specialCopy.y);
 
 	fooMock.InjectMakeSpecialCopyMyStruct(MakeSpecialCopyMyStructSubstitute2); // Mocking methods injection.
 	auto specialCopy2 = fooMock.MakeSpecialCopyMyStruct(myStruct);
-	EXPECT_EQ(specialCopy2.x, 16);
-	EXPECT_EQ(specialCopy2.y, 16);
+	EXPECT_EQ(16, specialCopy2.x);
+	EXPECT_EQ(16, specialCopy2.y);
 }
 
 TEST(Mockingbird, PassingMockPolymorphism){
@@ -77,13 +77,13 @@ TEST(Mockingbird, PassingMockPolymorphism){
 	fooMock.InjectMakeSpecialCopyMyStruct(&MakeSpecialCopyMyStructSubstitute);
 
 	auto createdMyStruct2 = GetMyStructFoo(std::make_unique<FooMock>(fooMock), 5, 5);
-	EXPECT_EQ(createdMyStruct2.x, 20);
-	EXPECT_EQ(createdMyStruct2.y, 20);
+	EXPECT_EQ(20, createdMyStruct2.x);
+	EXPECT_EQ(20, createdMyStruct2.y);
 }
 
-TEST(Mockingbird, NoMock){
+TEST(Mockingbird, Spy){
 	FooMock fooMock;
-	EXPECT_EQ(fooMock.GetTen(), 10); // not injected so it returns the value of the base class.
+	EXPECT_EQ(10, fooMock.GetTen()); // not injected so it returns the value of the base class.
 }
 
 TEST(Mockingbird, CallsCount) {
@@ -91,11 +91,11 @@ TEST(Mockingbird, CallsCount) {
 	FooMock fooMock;
 
 	fooMock.InjectResetMyStruct(ResetMyStructSubstitute); // Mocking methods injection.
-	EXPECT_EQ(fooMock.GetResetMyStructCallCounter(), 0);
+	EXPECT_EQ(0, fooMock.GetResetMyStructCallCounter());
 	fooMock.ResetMyStruct(myStruct);
-	EXPECT_EQ(fooMock.GetResetMyStructCallCounter(), 1);
+	EXPECT_EQ(1, fooMock.GetResetMyStructCallCounter());
 	fooMock.ResetMyStruct(myStruct);
-	EXPECT_EQ(fooMock.GetResetMyStructCallCounter(), 2);
+	EXPECT_EQ(2, fooMock.GetResetMyStructCallCounter());
 }
 
 TEST(Mockingbird, DefaultDummyFunctions) {
@@ -103,22 +103,22 @@ TEST(Mockingbird, DefaultDummyFunctions) {
 	FooMock fooMock;
 
 	auto createdMyStruct = fooMock.CreateMyStruct(10, 10);
-	EXPECT_EQ(createdMyStruct.x, 0);
-	EXPECT_EQ(createdMyStruct.y, 0);
+	EXPECT_EQ(0, createdMyStruct.x);
+	EXPECT_EQ(0, createdMyStruct.y);
 
 	createdMyStruct = fooMock.CreateMyStruct(9);
-	EXPECT_EQ(createdMyStruct.x, 0);
-	EXPECT_EQ(createdMyStruct.y, 0);
+	EXPECT_EQ(0, createdMyStruct.x);
+	EXPECT_EQ(0, createdMyStruct.y);
 
 	createdMyStruct = fooMock.MakeSpecialCopyMyStruct(myStruct);
-	EXPECT_EQ(createdMyStruct.x, 0);
-	EXPECT_EQ(createdMyStruct.y, 0);
+	EXPECT_EQ(0, createdMyStruct.x);
+	EXPECT_EQ(0, createdMyStruct.y);
 
 	createdMyStruct = fooMock.MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
-	EXPECT_EQ(createdMyStruct.x, 0);
-	EXPECT_EQ(createdMyStruct.y, 0);
+	EXPECT_EQ(0, createdMyStruct.x);
+	EXPECT_EQ(0, createdMyStruct.y);
 	
 	fooMock.ResetMyStruct(myStruct);
-	EXPECT_EQ(createdMyStruct.x, 0);
-	EXPECT_EQ(createdMyStruct.y, 0);
+	EXPECT_EQ(0, createdMyStruct.x);
+	EXPECT_EQ(0, createdMyStruct.y);
 }
