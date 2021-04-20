@@ -127,6 +127,7 @@ EXPECT_EQ(16, created.y);
 EXPECT_EQ(16, fooMock.GetMakeSpecialCopyMyStruct1CallCounter());
 EXPECT_EQ(10, fooMock.GetTen()); // Spying.
 ```
+It is important to note that the number 1 in `GetMakeSpecialCopyMyStruct1CallCounter` is the number passed in the fixture `FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)` before `x` parameter. 
 
 **Note**: For a mocked method if a substitute is not injected the default behavior will be the behaviour of the dummy function in the fixture.
 
