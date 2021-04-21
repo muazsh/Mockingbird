@@ -25,6 +25,10 @@ Mockingbird provides 6 Macros to mock any class with virtual methods:
 5.	A number for numbering the overloading methods.
 6.	The signature arguments names separated by commas. 
 -	`CONST_FUNCTION_OVERLOADING `: This macro is to setup an injection functionality for the `const` overloaded virtual methods, it takes same arguments as `FUNCTION_OVERLOADING` macro.
+-	`HIDE`: Same as `FUNCTION` but for mocking non-virtual methods,
+-	`CONST_HIDE`: Same as `CONST_FUNCTION` but for mocking non-virtual methods.
+-	`HIDE_OVERLOADING`: Same as `FUNCTION_OVERLOADING` but for mocking non-virtual methods.
+-	`CONST_HIDE_OVERLOADING`: Same as `CONST_FUNCTION_OVERLOADING` but for mocking non-virtual methods.
 -	`END_MOCK`: This must be the last macro call and it takes 1 argument: the name of the generated mocking class (optionally).
 
 For each mocked method `Fx` in the mocking class there will be 3 corresponding methods:
