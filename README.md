@@ -36,6 +36,17 @@ For each mocked method `Fx` in the mocking class there will be 3 corresponding m
 2.	`InjectFx`: This is to stub a substitute function.
 3.	`GetFxCallCounter`: Returns the number of calls of the mocked method.
 
+**Features**:
+-	All compilers with c++11 and hight should compile Mockingbird, compilation tested on: MSVC, GCC, Clang, ICC, ICX, ARM and DJGPP.
+-	Mocking any virtual method (const and overloaded).
+-	Hiding any non-virtual method (const and overloaded).
+-	Counting number of calls of mocked/hidden methods.
+-	Supporting spying the original method.
+
+**Limitations**:
+-	Mocked class must have a default constructor.
+
+
 Here are two examples:
 - **Simple example**:
 
@@ -91,6 +102,7 @@ public:
 	virtual MyStruct MakeSpecialCopyMyStruct(const std::shared_ptr<MyStruct>& myStruct) const { return MyStruct{ myStruct->x, myStruct->y }; }
 	virtual MyStruct MakeSpecialCopyMyStruct(const MyStruct& myStruct) const { return MyStruct{ myStruct.x, myStruct.y }; }
 	virtual int GetTen() { return 10; }
+	std::string GetString() { return "Original"; }
 }; 
 ```
 Assuming all methods except of `GetTen` are to be mocked, then a test fixture for the class `Foo` should be intorduced using **Mockingbird** macros and dummy versions of methods to be mocked, this fixture gets written only once for a project where `Foo` appears in tests as a mock:
@@ -100,6 +112,7 @@ const MyStruct CreateMyStructDummy(int x, int y) { return MyStruct(); }
 const MyStruct CreateMyStructDummy1(int x) { return MyStruct(); }
 MyStruct MakeSpecialCopyMyStructDummy(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct(); } // This is a static method wihch cannot be const
 MyStruct MakeSpecialCopyMyStructDummy1(const MyStruct& myStruct) { return MyStruct(); }
+std::string GetStringDummy() { return ""; }
 
 START_MOCK(FooMock, Foo)
 FUNCTION(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructDummy, myStruct)
@@ -107,6 +120,7 @@ FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDummy, x
 FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)
 CONST_FUNCTION(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct), &MakeSpecialCopyMyStructDummy, myStruct)
 CONST_FUNCTION_OVERLOADING(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct), &MakeSpecialCopyMyStructDummy1, 1, myStruct)
+HIDE(GetString, std::string, (), &GetStringDummy)
 END_MOCK(FooMock)
 ```
 When calling one of `FUNCTION` macros note that when passing the signature arguments names at the end, they must be same as the names in the passed signature, so in case of ` CreateMyStruct ` `x,y` in the end are named same as in signature argument `(int x, int y)`.
@@ -119,20 +133,30 @@ const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10,
 const MyStruct CreateMyStructSubstitute1(int x) { return MyStruct{ x + 5, x + 5 }; }
 MyStruct MakeSpecialCopyMyStructSubstitute(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ myStruct->x + 10, myStruct->y + 10 }; }
 MyStruct MakeSpecialCopyMyStructSubstitute1(const MyStruct& myStruct) { return MyStruct{ myStruct.x + 15, myStruct.y + 15 }; }
+std::string GetStringSubstitute() { return "Mock"; }
 ```
 Finally substitutes need to be injected into an instance of `MockFoo` which can be used as if it is of a `Foo` class like:
 ``` c++
 MyStruct myStruct{ 1, 1 };
 FooMock fooMock;
+
 fooMock.InjectMakeSpecialCopyMyStruct(MakeSpecialCopyMyStructSubstitute1); // Mocking methods injection.
 auto specialCopy = fooMock.MakeSpecialCopyMyStruct(myStruct);
 EXPECT_EQ(16, created.x);
 EXPECT_EQ(16, created.y);
 EXPECT_EQ(16, fooMock.GetMakeSpecialCopyMyStruct1CallCounter());
 EXPECT_EQ(10, fooMock.GetTen()); // Spying.
+
+fooMock.InjectGetString(GetStringSubstitute);
+EXPECT_EQ("Mock", fooMock.GetString());
 ```
 It is important to note that the number 1 in `GetMakeSpecialCopyMyStruct1CallCounter` is the number passed in the fixture `FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)` before `x` parameter. 
 
-**Note**: For a mocked method if a substitute is not injected the default behavior will be the behaviour of the dummy function in the fixture.
+**Note**: 
+-	For a mocked method if a substitute is not injected the default behavior will be the behaviour of the dummy function in the fixture.
+-	When hiding a non-virtual method polymorphism won't work anymore (of course because the method is not virtual, see Hide test in test.cpp).
+
+
+
 
 
