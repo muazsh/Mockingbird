@@ -144,7 +144,7 @@ fooMock.InjectMakeSpecialCopyMyStruct(MakeSpecialCopyMyStructSubstitute1); // Mo
 auto specialCopy = fooMock.MakeSpecialCopyMyStruct(myStruct);
 EXPECT_EQ(16, created.x);
 EXPECT_EQ(16, created.y);
-EXPECT_EQ(16, fooMock.GetMakeSpecialCopyMyStruct1CallCounter());
+EXPECT_EQ(1, fooMock.GetMakeSpecialCopyMyStruct1CallCounter());
 EXPECT_EQ(10, fooMock.GetTen()); // Spying.
 
 fooMock.InjectGetString(GetStringSubstitute);
