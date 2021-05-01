@@ -8,7 +8,7 @@ I am using here the word `method` to refer to a class member function and the wo
 
 For a class to be mocked Mockingbird creates a mocking class and then the developer should instantiate that mocking class and inject (stub) functions instead of the methods wanted to be mocked.
 
-Mockingbird provides 6 Macros to mock any class with virtual methods:
+Mockingbird provides the following Macros to enable mocking any class:
 -	` START_MOCK`: This must be the first macro call and it takes 2 arguments: the name of the generated mocking class and the name of the mocked class.
 -	`FUNCTION`: This macro is to setup an injection functionality for any `non-const` virtual method, it takes the following arguments:
 1.	Method name.
