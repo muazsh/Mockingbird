@@ -1,5 +1,3 @@
-<meta name="google-site-verification" content="DSmzWejDaqp4MhuW6R21h-m69ELKIKDIUY8muIETbXM" />
-
 # Mockingbird
 
 :white_check_mark: All compilers with c++11 and higher are supported.
@@ -39,7 +37,7 @@ For each mocked method `Fx` in the mocking class there will be 3 corresponding m
 3.	`GetFxCallCounter`: Returns the number of calls of the mocked method.
 
 **Features**:
--	All compilers with c++11 and hight should compile Mockingbird, compilation tested on: MSVC, GCC, Clang, ICC, ICX, ARM and DJGPP.
+-	All compilers with c++11 and higher should compile Mockingbird, compilation tested on: MSVC, GCC, Clang, ICC, ICX, ARM and DJGPP.
 -	Mocking any virtual method (const and overloaded).
 -	Hiding any non-virtual method (const and overloaded).
 -	Counting number of calls of mocked/hidden methods.
