@@ -2,37 +2,37 @@
 
 :white_check_mark: All compilers with c++11 and higher are supported.
 
-Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework and it provides mocking overloaded methods and counting number of calls of a mocked method.
+Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework and it provides mocking virtual/non-virtual methods whether it is overloaded or not, const or not, and also it provides counting number of calls of a mocked method.
 
-I am using here the word `method` to refer to a class member function and the word `function` to refer to a free function.   
+I am using here the term `method` to refer to a class member function and the term `function` to refer to a free function.   
 
-For a class to be mocked Mockingbird creates a mocking class and then the developer should instantiate that mocking class and inject (stub) functions instead of the methods wanted to be mocked.
+For a class to be mocked Mockingbird creates a mocking class and then the developer should instantiate that mocking class and inject (stub) functions instead of the methods which are to be mocked.
 
 Mockingbird provides the following Macros to enable mocking any class:
--	` START_MOCK`: This must be the first macro call and it takes 2 arguments: the name of the generated mocking class and the name of the mocked class.
+-	`START_MOCK`: This must be the first macro call and it takes 2 arguments: the name of the generated mocking class and the name of the mocked class.
 -	`FUNCTION`: This macro is to setup an injection functionality for any `non-const` virtual method, it takes the following arguments:
 1.	Method name.
 2.	Method return type.
 3.	Method signature surrounded by parentheses.
-4.	A pointer to the substitute function.
+4.	A pointer to a substitute function.
 5.	The signature arguments names separated by commas. 
 -	`CONST_FUNCTION`: This macro is to setup an injection functionality for any `const` virtual method, it takes same arguments as `FUNCTION` macro.    
 -	`FUNCTION_OVERLOADING`: This macro is to setup an injection functionality for the overloaded virtual methods, it takes the following arguments:
 1.	Method name.
 2.	Method return type.
 3.	Method signature surrounded by parentheses.
-4.	A pointer to the substitute function.
+4.	A pointer to a substitute function.
 5.	A number for numbering the overloading methods.
 6.	The signature arguments names separated by commas. 
 -	`CONST_FUNCTION_OVERLOADING `: This macro is to setup an injection functionality for the `const` overloaded virtual methods, it takes same arguments as `FUNCTION_OVERLOADING` macro.
--	`HIDE`: Same as `FUNCTION` but for mocking non-virtual methods,
+-	`HIDE`: Same as `FUNCTION` but for mocking non-virtual methods.
 -	`CONST_HIDE`: Same as `CONST_FUNCTION` but for mocking non-virtual methods.
 -	`HIDE_OVERLOADING`: Same as `FUNCTION_OVERLOADING` but for mocking non-virtual methods.
 -	`CONST_HIDE_OVERLOADING`: Same as `CONST_FUNCTION_OVERLOADING` but for mocking non-virtual methods.
 -	`END_MOCK`: This must be the last macro call and it takes 1 argument: the name of the generated mocking class (optionally).
 
 For each mocked method `Fx` in the mocking class there will be 3 corresponding methods:
-1.	`Fx`: The method itself.
+1.	`Fx`: The method itself as a mock.
 2.	`InjectFx`: This is to stub a substitute function.
 3.	`GetFxCallCounter`: Returns the number of calls of the mocked method.
 
@@ -40,7 +40,7 @@ For each mocked method `Fx` in the mocking class there will be 3 corresponding m
 -	All compilers with c++11 and higher should compile Mockingbird, compilation tested on: MSVC, GCC, Clang, ICC, ICX, ARM and DJGPP.
 -	Mocking any virtual method (const and overloaded).
 -	Hiding any non-virtual method (const and overloaded).
--	Counting number of calls of mocked/hidden methods.
+-	Counting the number of calls of mocked/hidden methods.
 -	Supporting spying the original method.
 
 **Limitations**:
@@ -150,7 +150,7 @@ EXPECT_EQ(10, fooMock.GetTen()); // Spying.
 fooMock.InjectGetString(GetStringSubstitute);
 EXPECT_EQ("Mock", fooMock.GetString());
 ```
-It is important to note that the number 1 in `GetMakeSpecialCopyMyStruct1CallCounter` is the number passed in the fixture `FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)` before `x` parameter. 
+It is important to note that the number 1 in `GetMakeSpecialCopyMyStruct1CallCounter` is the number passed in the fixture `FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)` before `x` parameter in this example. 
 
 **Note**: 
 -	For a mocked method if a substitute is not injected the default behavior will be the behaviour of the dummy function in the fixture.
