@@ -1,6 +1,6 @@
 # Mockingbird
 
-:white_check_mark: All compilers with c++11 and higher are supported.
+:white_check_mark: All C++11 compilers and higher are supported.
 
 Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework and it provides mocking virtual/non-virtual methods whether it is overloaded or not, const or not, and also it provides counting number of calls of a mocked method.
 
@@ -37,7 +37,7 @@ For each mocked method `Fx` in the mocking class there will be 3 corresponding m
 3.	`GetFxCallCounter`: Returns the number of calls of the mocked method.
 
 **Features**:
--	All compilers with c++11 and higher should compile Mockingbird, compilation tested on: MSVC, GCC, Clang, ICC, ICX, ARM and DJGPP.
+-	All C++11 compilers and higher should compile Mockingbird, compilation tested on: MSVC, GCC, Clang, ICC, ICX, ARM and DJGPP.
 -	Mocking any virtual method (const and overloaded).
 -	Hiding any non-virtual method (const and overloaded).
 -	Counting the number of calls of mocked/hidden methods.
