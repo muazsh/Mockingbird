@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "FooTestFixture.h"
 
-// Subsitiutes
+// Substitutes
 void ResetMyStructSubstitute(MyStruct& myStruct) { myStruct.x = 10; myStruct.y = 10; }
 const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
 const MyStruct CreateMyStructSubstitute2(int x) { return MyStruct{ x + 5, x + 5 }; }
