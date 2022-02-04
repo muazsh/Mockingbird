@@ -1,12 +1,24 @@
 #include "pch.h"
 #include "FooTestFixture.h"
 
+// Subsitiutes
 void ResetMyStructSubstitute(MyStruct& myStruct) { myStruct.x = 10; myStruct.y = 10; }
 const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
 const MyStruct CreateMyStructSubstitute2(int x) { return MyStruct{ x + 5, x + 5 }; }
 MyStruct MakeSpecialCopyMyStructSubstitute(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ myStruct->x + 10, myStruct->y + 10 }; } // This is a static method wihch cannot be const
 MyStruct MakeSpecialCopyMyStructSubstitute2(const MyStruct& myStruct) { return MyStruct{ myStruct.x + 15, myStruct.y + 15 }; }
 std::string GetStringSubstitute() { return "Mock"; }
+
+// Functions to test Polymorphism.
+MyStruct GetMyStructFoo(const std::unique_ptr<Foo>& foo, int x, int y) {
+	auto myStruct = foo->CreateMyStruct(x, y);
+	foo->ResetMyStruct(myStruct);
+	return foo->MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
+}
+
+std::string GetStringFoo(Foo& foo) {
+	return foo.GetString();
+}
 
 TEST(Mockingbird, VoidReturnReferenceSignature){
 	MyStruct myStruct{ 1, 1 };
@@ -129,6 +141,6 @@ TEST(Mockingbird, Hide) {
 
 	fooMock.InjectGetString(GetStringSubstitute); // Mocking methods injection.
 	EXPECT_EQ("Mock", fooMock.GetString());
-	EXPECT_EQ("Original", GetStringFoo(fooMock));
+	EXPECT_EQ("Original", GetStringFoo(fooMock)); // hidden function is not virtual, no polymorphism.  
 	EXPECT_EQ(1, fooMock.GetGetStringCallCounter());
 }

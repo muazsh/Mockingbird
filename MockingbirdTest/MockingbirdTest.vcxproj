@@ -35,6 +35,7 @@
   <ItemGroup>
     <ClInclude Include="Foo.h" />
     <ClInclude Include="FooTestFixture.h" />
+    <ClInclude Include="MyStruct.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

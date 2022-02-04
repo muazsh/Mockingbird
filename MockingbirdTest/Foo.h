@@ -1,9 +1,6 @@
 #pragma once
-#include<memory>
-
-struct MyStruct {
-	int x, y;
-};
+#include "MyStruct.h"
+#include <memory>
 
 class Foo {
 public:
@@ -15,13 +12,3 @@ public:
 	virtual int GetTen() { return 10; }
 	std::string GetString() { return "Original"; }
 };
-
-MyStruct GetMyStructFoo(const std::unique_ptr<Foo>& foo, int x, int y) {
-	auto myStruct = foo->CreateMyStruct(x, y);
-	foo->ResetMyStruct(myStruct);
-	return foo->MakeSpecialCopyMyStruct(std::make_shared<MyStruct>(myStruct));
-}
-
-std::string GetStringFoo(Foo& foo) {
-	return foo.GetString();
-}
