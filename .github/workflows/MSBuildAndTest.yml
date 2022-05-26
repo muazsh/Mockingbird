@@ -36,7 +36,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild /m /p:Configuration=Release
+      run: msbuild Mockingbird.sln /p:Configuration=Release /p:Platform="x86"
       
     - name: Test
       run: dotnet test ./Mockingbird.sln --no-restore --verbosity normal
