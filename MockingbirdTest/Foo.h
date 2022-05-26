@@ -1,6 +1,7 @@
 #pragma once
 #include "MyStruct.h"
 #include <memory>
+#include <string>
 
 class Foo {
 public:
