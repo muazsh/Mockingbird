@@ -39,4 +39,4 @@ jobs:
       run: msbuild Mockingbird.sln /p:Configuration=Release /p:Platform="x86"
       
     - name: Test
-      run: dotnet test ./Mockingbird.sln --no-restore --verbosity normal
+      run: dotnet test --no-restore --verbosity normal
