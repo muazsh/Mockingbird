@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Mockingbird.hpp">
+    <ClInclude Include="Mockingbird.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
