@@ -48,11 +48,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mockingbird\Mockingbird.vcxproj">
-      <Project>{e4116e3c-b7f5-45cd-91f8-a0fb21d3ded1}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemDefinitionGroup />
@@ -116,6 +111,8 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ForcedUsingFiles>/FU;%(ForcedUsingFiles)</ForcedUsingFiles>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Mockingbird;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
