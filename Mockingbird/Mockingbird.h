@@ -9,6 +9,8 @@
 #ifndef MOCKINGBIRD
 #define MOCKINGBIRD
 
+#include <functional>
+
 #define START_MOCK(MockingClass, MockedClass)                                   \
 class MockingClass : public MockedClass {                                       \
  public:                                                                        \
@@ -102,7 +104,13 @@ m_##FuncName##overloadedMethodNumber##CallCounter++;                            
 return m_##FuncName##Class##overloadedMethodNumber.m_func(__VA_ARGS__);                                                       \
 }
 
-#define END_MOCK(MockingClass)\
+#define END_MOCK(MockingClass)                                                    \
+private:                                                                          \
+std::function<void(void)> m_dtor = [](){};                                       \
+public:                                                                           \
+void InjectDestructor(std::function<void(void)> dtor) { m_dtor = dtor; }          \
+~MockingClass(){m_dtor();}                                                        \
 };
+
 
 #endif // !MOCKINGBIRD
