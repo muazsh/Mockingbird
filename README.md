@@ -1,5 +1,7 @@
 # Mockingbird
 
+[![MSBuild](https://github.com/muazsh/Mockingbird/actions/workflows/MSBuildAndTest.yml/badge.svg)](https://github.com/muazsh/Mockingbird/actions/workflows/MSBuildAndTest.yml)
+
 :white_check_mark: All C++11 compilers and higher are supported.
 
 Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework and it provides mocking virtual/non-virtual methods whether it is overloaded or not, const or not, and also it provides counting number of calls of a mocked method.
