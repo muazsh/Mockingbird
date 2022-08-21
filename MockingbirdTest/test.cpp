@@ -12,6 +12,8 @@ MyStruct MakeSpecialCopyMyStructSubstitute2(const MyStruct& myStruct) { return M
 std::string GetStringSubstitute() { return "Mock"; }
 void Destructor() { g_checkDestructorCalled = "The Injected Destructor Is Called."; }
 
+const int Sum(int x, int y) { return x + y + 100; }
+
 // Functions to test Polymorphism.
 MyStruct GetMyStructFoo(const std::unique_ptr<Foo>& foo, int x, int y) {
 	auto myStruct = foo->CreateMyStruct(x, y);
@@ -155,4 +157,23 @@ TEST(Mockingbird, Dtor) {
 		fooMock.InjectDestructor(Destructor);
 	}
 	EXPECT_EQ("The Injected Destructor Is Called.", g_checkDestructorCalled);
+}
+
+START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, typename T, typename E)
+FUNCTION_TEMPLATE(Sum, T, (T x, E y), return x + y, x, y)
+FUNCTION_TEMPLATE_CONST(SumConst, T, (T x, E y), return x + y, x, y)
+FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return x + y + z, 1, x, y, z)
+END_MOCK(FooTemplatedMock)
+
+TEST(Mockingbird, Templates) {
+	FooTemplatedMock<double, float> fooTemplatedMock;
+	EXPECT_EQ(2, fooTemplatedMock.Sum(1,1));
+	EXPECT_EQ(2, fooTemplatedMock.SumConst(1, 1));
+	EXPECT_EQ(3, fooTemplatedMock.Sum(1, 1, 1));
+	EXPECT_EQ(1, fooTemplatedMock.GetSumCallCounter());
+	fooTemplatedMock.SumConst(2, 2);
+	EXPECT_EQ(2, fooTemplatedMock.GetSumConstCallCounter());
+	fooTemplatedMock.Sum(1, 1, 1);
+	fooTemplatedMock.Sum(1, 1, 1);
+	EXPECT_EQ(3, fooTemplatedMock.GetSumCallCounter1());
 }
