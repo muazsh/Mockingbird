@@ -4,7 +4,7 @@
 
 :white_check_mark: All C++11 compilers and higher are supported.
 
-Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework and it provides mocking virtual/non-virtual methods whether it is overloaded or not, const or not, and also it provides counting number of calls of a mocked method.
+Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework and it provides mocking virtual/non-virtual methods whether it is overloaded or not, const or not, template or not, and also it provides counting number of calls of a mocked method.
 
 I am using here the term `method` to refer to a class member function and the term `function` to refer to a free function.   
 
@@ -38,7 +38,8 @@ For each mocked method `Fx` in the mocking class there will be 3 corresponding m
 2.	`InjectFx`: This is to stub a substitute function.
 3.	`GetFxCallCounter`: Returns the number of calls of the mocked method.
 
-**Class Template Mock**
+**Class Template Mock:**
+
 Mockingbird supports mocking class templates, but the usage mechanism deviates a bit from mocking a no template class, where for mocking a no template class Mockingbird allows building one mocking class and then using that mock anywhere and simply injecting mocking methods, so one mock class and the behavior can be changed by injecting differnt mocking methods, however; for tempalte classes a new mock to be created for each new behavior and no injection is possible because injection is a run-time operation, the following macros are for class and function template:
 
 -	`START_MOCK_TEMPLATE(MockingClass, MockedClass, ...)`
