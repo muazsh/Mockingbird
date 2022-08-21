@@ -18,7 +18,7 @@ Mockingbird provides the following Macros to enable mocking any class:
 3.	Method signature surrounded by parentheses.
 4.	A pointer to a substitute function.
 5.	The signature arguments names separated by commas. 
--	`CONST_FUNCTION`: This macro is to setup an injection functionality for any `const` virtual method, it takes same arguments as `FUNCTION` macro.    
+-	`FUNCTION_CONST`: This macro is to setup an injection functionality for any `const` virtual method, it takes same arguments as `FUNCTION` macro.    
 -	`FUNCTION_OVERLOADING`: This macro is to setup an injection functionality for the overloaded virtual methods, it takes the following arguments:
 1.	Method name.
 2.	Method return type.
@@ -28,9 +28,9 @@ Mockingbird provides the following Macros to enable mocking any class:
 6.	The signature arguments names separated by commas. 
 -	`CONST_FUNCTION_OVERLOADING `: This macro is to setup an injection functionality for the `const` overloaded virtual methods, it takes same arguments as `FUNCTION_OVERLOADING` macro.
 -	`HIDE`: Same as `FUNCTION` but for mocking non-virtual methods.
--	`CONST_HIDE`: Same as `CONST_FUNCTION` but for mocking non-virtual methods.
+-	`HIDE_CONST`: Same as `CONST_FUNCTION` but for mocking non-virtual methods.
 -	`HIDE_OVERLOADING`: Same as `FUNCTION_OVERLOADING` but for mocking non-virtual methods.
--	`CONST_HIDE_OVERLOADING`: Same as `CONST_FUNCTION_OVERLOADING` but for mocking non-virtual methods.
+-	`HIDE_CONST_OVERLOADING`: Same as `CONST_FUNCTION_OVERLOADING` but for mocking non-virtual methods.
 -	`END_MOCK`: This must be the last macro call and it takes 1 argument: the name of the generated mocking class (optionally).
 
 For each mocked method `Fx` in the mocking class there will be 3 corresponding methods:
@@ -38,12 +38,22 @@ For each mocked method `Fx` in the mocking class there will be 3 corresponding m
 2.	`InjectFx`: This is to stub a substitute function.
 3.	`GetFxCallCounter`: Returns the number of calls of the mocked method.
 
+**Class Template Mock**
+Mockingbird supports mocking class templates, but the usage mechanism deviates a bit from mocking a no template class, where for mocking a no template class Mockingbird allows building one mocking class and then using that mock anywhere and simply injecting mocking methods, so one mock class and the behavior can be changed by injecting differnt mocking methods, however; for tempalte classes a new mock to be created for each new behavior and no injection is possible because injection is a run-time operation, the following macros are for class and function template:
+
+-	`START_MOCK_TEMPLATE(MockingClass, MockedClass, ...)`
+-	`FUNCTION_TEMPLATE(FuncName,ReturnType, Signature, Expression, .../*signature variables*/)`: `Expression` is the mock behavior.
+-	`FUNCTION_TEMPLATE_CONST`
+-	`FUNCTION_TEMPLATE_OVERLOADING`
+-	`FUNCTION_TEMPLATE_CONST_OVERLOADING`
+
 **Features**:
 -	All C++11 compilers and higher should compile Mockingbird, compilation tested on: MSVC, GCC, Clang, ICC, ICX, ARM and DJGPP.
 -	Mocking any virtual method (const and overloaded).
 -	Hiding any non-virtual method (const and overloaded).
 -	Counting the number of calls of mocked/hidden methods.
 -	Supporting spying the original method.
+-	Class template mock.       
 
 **Limitations**:
 -	Mocked class must have a default constructor.
@@ -105,7 +115,16 @@ public:
 	virtual MyStruct MakeSpecialCopyMyStruct(const MyStruct& myStruct) const { return MyStruct{ myStruct.x, myStruct.y }; }
 	virtual int GetTen() { return 10; }
 	std::string GetString() { return "Original"; }
-}; 
+};
+
+template<class T, class E>
+class TemplatedFoo {
+public:
+	virtual T Sum(T x, E y) = 0;
+	virtual T SumConst(T x, E y) const = 0;
+	virtual T Sum(T x, E y, T z) = 0;
+	~TemplatedFoo() {}
+};
 ```
 Assuming all methods except of `GetTen` are to be mocked, then a test fixture for the class `Foo` should be intorduced using **Mockingbird** macros and dummy versions of methods to be mocked, this fixture gets written only once for a project where `Foo` appears in tests as a mock:
 ```c++
@@ -120,8 +139,8 @@ START_MOCK(FooMock, Foo)
 FUNCTION(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructDummy, myStruct)
 FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDummy, x, y)
 FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)
-CONST_FUNCTION(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct), &MakeSpecialCopyMyStructDummy, myStruct)
-CONST_FUNCTION_OVERLOADING(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct), &MakeSpecialCopyMyStructDummy1, 1, myStruct)
+FUNCTION_CONST(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct), &MakeSpecialCopyMyStructDummy, myStruct)
+FUNCTION_CONST_OVERLOADING(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct), &MakeSpecialCopyMyStructDummy1, 1, myStruct)
 HIDE(GetString, std::string, (), &GetStringDummy)
 END_MOCK(FooMock)
 ```
@@ -151,6 +170,15 @@ EXPECT_EQ(10, fooMock.GetTen()); // Spying.
 
 fooMock.InjectGetString(GetStringSubstitute);
 EXPECT_EQ("Mock", fooMock.GetString());
+```
+
+For class templates, as mentioned previously a new mock should be introduced for each new needed behavior (no injection is possible)(see tests):
+```
+START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, typename T, typename E)
+FUNCTION_TEMPLATE(Sum, T, (T x, E y), return x + y, x, y)
+FUNCTION_TEMPLATE_CONST(SumConst, T, (T x, E y), return x + y, x, y)
+FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return x + y + z, 1, x, y, z)
+END_MOCK(FooTemplatedMock)
 ```
 It is important to note that the number 1 in `GetMakeSpecialCopyMyStruct1CallCounter` is the number passed in the fixture `FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)` before `x` parameter in this example. 
 
