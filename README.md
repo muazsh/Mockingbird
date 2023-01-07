@@ -4,7 +4,7 @@
 
 :white_check_mark: All C++11 compilers and higher are supported.
 
-Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework and it provides mocking virtual/non-virtual methods whether it is overloaded or not, const or not, template or not, and also it provides counting number of calls of a mocked method.
+Mockingbird is a mocking framework for c++, it is a simple yet a powerful framework, Mockingbird provides mocking virtual/non-virtual methods whether it is overloaded or not, const or not, template or not, and also it provides counting number of calls of a mocked method.
 
 I am using here the term `method` to refer to a class member function and the term `function` to refer to a free function.   
 
