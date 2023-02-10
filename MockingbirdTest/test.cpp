@@ -114,6 +114,10 @@ TEST(Mockingbird, CallsCount) {
 	EXPECT_EQ(1, fooMock.GetResetMyStructCallCounter());
 	fooMock.ResetMyStruct(myStruct);
 	EXPECT_EQ(2, fooMock.GetResetMyStructCallCounter());
+
+	fooMock.InjectMakeSpecialCopyMyStruct(&MakeSpecialCopyMyStructSubstitute2);
+	fooMock.MakeSpecialCopyMyStruct(myStruct);
+	EXPECT_EQ(1, fooMock.GetMakeSpecialCopyMyStruct1CallCounter());
 }
 
 TEST(Mockingbird, DefaultDummyFunctions) {

@@ -111,7 +111,7 @@ public:                                                                         
 void Inject##FuncName(decltype(Substitute) sub){                                           \
 m_##FuncName##Class##overloadedMethodNumber.m_func = sub;                                  \
 }                                                                                          \
-int Get##FuncName##overloadedMethodNumber##CallCounter(){return m_##FuncName##CallCounter;}
+int Get##FuncName##overloadedMethodNumber##CallCounter(){return m_##FuncName##overloadedMethodNumber##CallCounter;}
 
 #define FUNCTION_OVERLOADING(FuncName,ReturnType, Signature, Substitute, overloadedMethodNumber, .../*signature variables*/)\
 OVERLOAD_INJECTION_SET(FuncName, Substitute, overloadedMethodNumber)                                                        \
