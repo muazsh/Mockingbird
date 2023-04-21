@@ -6,11 +6,8 @@ std::string g_checkDestructorCalled = "The Injected Destructor Is NOT Called.";
 // Substitutes
 void ResetMyStructSubstitute(MyStruct& myStruct) { myStruct.x = 10; myStruct.y = 10; }
 const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
-const MyStruct CreateMyStructSubstitute2(int x) { return MyStruct{ x + 5, x + 5 }; }
 MyStruct MakeSpecialCopyMyStructSubstitute(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ myStruct->x + 10, myStruct->y + 10 }; } // This is a static method wihch cannot be const
 MyStruct MakeSpecialCopyMyStructSubstitute2(const MyStruct& myStruct) { return MyStruct{ myStruct.x + 15, myStruct.y + 15 }; }
-std::string GetStringSubstitute() { return "Mock"; }
-void Destructor() { g_checkDestructorCalled = "The Injected Destructor Is Called."; }
 
 const int Sum(int x, int y) { return x + y + 100; }
 
@@ -54,7 +51,8 @@ TEST(Mockingbird, Overloading) {
 	EXPECT_EQ(20, createdMyStruct1.x);
 	EXPECT_EQ(20, createdMyStruct1.y);
 
-	fooMock.InjectCreateMyStruct(CreateMyStructSubstitute2); // Mocking methods injection.
+	auto createMyStructSubstitute = [](int x)->const MyStruct{ return MyStruct{ x + 5, x + 5 }; };
+	fooMock.InjectCreateMyStruct(createMyStructSubstitute); // Mocking methods injection.
 	auto createdMyStruct2 = fooMock.CreateMyStruct(0);
 	EXPECT_EQ(5, createdMyStruct2.x);
 	EXPECT_EQ(5, createdMyStruct2.y);
@@ -147,8 +145,8 @@ TEST(Mockingbird, DefaultDummyFunctions) {
 
 TEST(Mockingbird, Hide) {
 	FooMock fooMock;
-
-	fooMock.InjectGetString(GetStringSubstitute); // Mocking methods injection.
+	auto getStringSubstitute = []()->std::string { return "Mock"; };
+	fooMock.InjectGetString(getStringSubstitute); // Mocking methods injection.
 	EXPECT_EQ("Mock", fooMock.GetString());
 	EXPECT_EQ("Original", GetStringFoo(fooMock)); // hidden function is not virtual, no polymorphism.  
 	EXPECT_EQ(1, fooMock.GetGetStringCallCounter());
@@ -158,7 +156,8 @@ TEST(Mockingbird, Dtor) {
 	EXPECT_EQ("The Injected Destructor Is NOT Called.", g_checkDestructorCalled);
 	{
 		FooMock fooMock;
-		fooMock.InjectDestructor(Destructor);
+		auto destructor = []() { g_checkDestructorCalled = "The Injected Destructor Is Called."; };
+		fooMock.InjectDestructor(destructor);
 	}
 	EXPECT_EQ("The Injected Destructor Is Called.", g_checkDestructorCalled);
 }
