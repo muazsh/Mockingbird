@@ -88,13 +88,6 @@ m_##FuncName##overloadedMethodNumber##CallCounter++;                            
 return m_##FuncName##Class##overloadedMethodNumber.m_func(__VA_ARGS__);                                                     \
 }
 
-#define HIDE_OVERLOADING(FuncName,ReturnType, Signature, Substitute, overloadedMethodNumber, .../*signature variables*/)\
-OVERLOAD_INJECTION_SET(FuncName, Substitute, overloadedMethodNumber)                                                    \
-ReturnType FuncName Signature{                                                                                          \
-m_##FuncName##overloadedMethodNumber##CallCounter++;                                                                    \
-return m_##FuncName##Class##overloadedMethodNumber.m_func(__VA_ARGS__);                                                 \
-}
-
 #define END_MOCK(MockingClass)                                                    \
 private:                                                                          \
 std::function<void(void)> m_dtor = [](){};                                        \

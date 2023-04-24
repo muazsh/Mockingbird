@@ -6,5 +6,5 @@
 #pragma once
 
 #include "gtest/gtest.h"
-#include "Mockingbird.h"
+#include "Mockingbird.hpp"
 #include <memory>
