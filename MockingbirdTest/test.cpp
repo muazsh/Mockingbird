@@ -164,7 +164,7 @@ TEST(Mockingbird, Dtor) {
 
 START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, typename T, typename E)
 FUNCTION_TEMPLATE(Sum, T, (T x, E y), return x + y, x, y)
-FUNCTION_TEMPLATE_CONST(SumConst, T, (T x, E y), return x + y, x, y)
+FUNCTION_TEMPLATE(SumConst, T, (T x, E y)const, return x + y, x, y)
 FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return x + y + z, 1, x, y, z)
 END_MOCK(FooTemplatedMock)
 
