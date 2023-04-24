@@ -12,25 +12,19 @@ For a class to be mocked Mockingbird creates a mocking class and then the develo
 
 Mockingbird provides the following Macros to enable mocking any class:
 -	`START_MOCK`: This must be the first macro call and it takes 2 arguments: the name of the generated mocking class and the name of the mocked class.
--	`FUNCTION`: This macro is to setup an injection functionality for any `non-const` virtual method, it takes the following arguments:
+-	`FUNCTION`: This macro is to setup an injection functionality for any method, it takes the following arguments:
 1.	Method name.
 2.	Method return type.
-3.	Method signature surrounded by parentheses.
+3.	Method signature surrounded by parentheses and followed by `const` if the method is `const`.
 4.	A pointer to a substitute function.
-5.	The signature arguments names separated by commas. 
--	`FUNCTION_CONST`: This macro is to setup an injection functionality for any `const` virtual method, it takes same arguments as `FUNCTION` macro.    
+5.	The signature arguments names separated by commas.    
 -	`FUNCTION_OVERLOADING`: This macro is to setup an injection functionality for the overloaded virtual methods, it takes the following arguments:
 1.	Method name.
 2.	Method return type.
-3.	Method signature surrounded by parentheses.
+3.	Method signature surrounded by parentheses and followed by `const` if the method is `const`.
 4.	A pointer to a substitute function.
 5.	A number for numbering the overloading methods.
-6.	The signature arguments names separated by commas. 
--	`CONST_FUNCTION_OVERLOADING `: This macro is to setup an injection functionality for the `const` overloaded virtual methods, it takes same arguments as `FUNCTION_OVERLOADING` macro.
--	`HIDE`: Same as `FUNCTION` but for mocking non-virtual methods.
--	`HIDE_CONST`: Same as `CONST_FUNCTION` but for mocking non-virtual methods.
--	`HIDE_OVERLOADING`: Same as `FUNCTION_OVERLOADING` but for mocking non-virtual methods.
--	`HIDE_CONST_OVERLOADING`: Same as `CONST_FUNCTION_OVERLOADING` but for mocking non-virtual methods.
+6.	The signature arguments names separated by commas.
 -	`END_MOCK`: This must be the last macro call and it takes 1 argument: the name of the generated mocking class (optionally).
 
 For each mocked method `Fx` in the mocking class there will be 3 corresponding methods:
@@ -44,9 +38,7 @@ Mockingbird supports mocking class templates, but the usage mechanism deviates a
 
 -	`START_MOCK_TEMPLATE(MockingClass, MockedClass, ...)`
 -	`FUNCTION_TEMPLATE(FuncName,ReturnType, Signature, Expression, .../*signature variables*/)`: `Expression` is the mock behavior.
--	`FUNCTION_TEMPLATE_CONST`
 -	`FUNCTION_TEMPLATE_OVERLOADING`
--	`FUNCTION_TEMPLATE_CONST_OVERLOADING`
 
 **Features**:
 -	All C++11 compilers and higher should compile Mockingbird, compilation tested on: MSVC, GCC, Clang, ICC, ICX, ARM and DJGPP.
@@ -84,7 +76,7 @@ FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDummy, x
 END_MOCK(FooMock)
 ```
 
-Then in the tests if a method needs some desired behaviour a substitute function or lambda should be intorduced, for example:
+Then in the tests if a method needs some desired behaviour a substitute function or lambda (without capture) should be intorduced, for example:
 ```c++
 const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
 ```
@@ -97,7 +89,7 @@ EXPECT_EQ(15, created.x);
 EXPECT_EQ(15, created.y);
 ```
 
-As an alternative of injecting a function, a lambda can be injected as well like:
+As an alternative of injecting a function, a lambda can be injected as well in case it needs no capture like:
 ```c++
 FooMock fooMock;
 auto lambda = [](int x, int y)->const MyStruct{ return MyStruct{ x + 10, y + 10 }; };
@@ -150,9 +142,9 @@ START_MOCK(FooMock, Foo)
 FUNCTION(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructDummy, myStruct)
 FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDummy, x, y)
 FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)
-FUNCTION_CONST(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct), &MakeSpecialCopyMyStructDummy, myStruct)
-FUNCTION_CONST_OVERLOADING(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct), &MakeSpecialCopyMyStructDummy1, 1, myStruct)
-HIDE(GetString, std::string, (), &GetStringDummy)
+FUNCTION(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct)const, &MakeSpecialCopyMyStructDummy, myStruct)
+FUNCTION_OVERLOADING(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct)const, &MakeSpecialCopyMyStructDummy1, 1, myStruct)
+FUNCTION(GetString, std::string, (), &GetStringDummy)
 END_MOCK(FooMock)
 ```
 When calling one of `FUNCTION` macros note that when passing the signature arguments names at the end, they must be same as the names in the passed signature, so in case of ` CreateMyStruct ` `x,y` in the end are named same as in signature argument `(int x, int y)`.
@@ -187,7 +179,7 @@ For class templates, as mentioned previously a new mock should be introduced for
 ```
 START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, typename T, typename E)
 FUNCTION_TEMPLATE(Sum, T, (T x, E y), return x + y, x, y)
-FUNCTION_TEMPLATE_CONST(SumConst, T, (T x, E y), return x + y, x, y)
+FUNCTION_TEMPLATE(SumConst, T, (T x, E y)const, return x + y, x, y)
 FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return x + y + z, 1, x, y, z)
 END_MOCK(FooTemplatedMock)
 ```
