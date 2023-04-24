@@ -84,7 +84,7 @@ FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDummy, x
 END_MOCK(FooMock)
 ```
 
-Then in the tests if a method needs some desired behaviour a substitute should be intorduced, for example:
+Then in the tests if a method needs some desired behaviour a substitute function or lambda should be intorduced, for example:
 ```c++
 const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
 ```
@@ -92,6 +92,16 @@ and finally injecting the substitute and using `MockFoo` object as if it is of `
 ```c++
 FooMock fooMock;
 fooMock.InjectCreateMyStruct(CreateMyStructSubstitute); // Mocking function injection.
+auto created = fooMock.CreateMyStruct(5,5);
+EXPECT_EQ(15, created.x);
+EXPECT_EQ(15, created.y);
+```
+
+As an alternative of injecting a function, a lambda can be injected as well like:
+```c++
+FooMock fooMock;
+auto lambda = [](int x, int y)->const MyStruct{ return MyStruct{ x + 10, y + 10 }; };
+fooMock.InjectCreateMyStruct(lambda); // Mocking behavior injection.
 auto created = fooMock.CreateMyStruct(5,5);
 EXPECT_EQ(15, created.x);
 EXPECT_EQ(15, created.y);
