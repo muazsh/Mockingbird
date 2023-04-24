@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Foo.h"
-#include "Mockingbird.h"
+#include "Mockingbird.hpp"
 
 void ResetMyStructDummy(MyStruct& myStruct) {}
 const MyStruct CreateMyStructDummy(int x, int y) { return MyStruct{ 0,0 }; }
