@@ -83,6 +83,17 @@ TEST(Mockingbird, OverloadConstMethod) {
 	EXPECT_EQ(16, specialCopy2.y);
 }
 
+TEST(Mockingbird, rvalueRefernece) {
+	MyStruct myStruct{ 1, 1 };
+	FooMock fooMock;
+	auto lambda = [](MyStruct&& myStruct) {return MyStruct{ 30,30 }; };
+	fooMock.InjectMakeSpecialCopyMyStruct(lambda); // Mocking methods injection.
+	auto specialCopy = fooMock.MakeSpecialCopyMyStruct(std::move(myStruct));
+	EXPECT_EQ(30, specialCopy.x);
+	EXPECT_EQ(30, specialCopy.y);
+	EXPECT_EQ(1, fooMock.GetMakeSpecialCopyMyStruct2CallCounter());
+}
+
 TEST(Mockingbird, PassingMockPolymorphism){
 	MyStruct myStruct{ 1, 1 };
 	FooMock fooMock;

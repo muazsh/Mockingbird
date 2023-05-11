@@ -10,6 +10,7 @@ public:
 	virtual const MyStruct CreateMyStruct(int x) { return MyStruct{ x,x }; };
 	virtual MyStruct MakeSpecialCopyMyStruct(const std::shared_ptr<MyStruct>& myStruct) const { return MyStruct{ myStruct->x, myStruct->y }; }
 	virtual MyStruct MakeSpecialCopyMyStruct(const MyStruct& myStruct) const { return MyStruct{ myStruct.x, myStruct.y }; }
+	virtual MyStruct MakeSpecialCopyMyStruct(MyStruct&& myStruct) const { return MyStruct{ myStruct.x, myStruct.y }; }
 	virtual int GetTen() { return 10; }
 	std::string GetString() { return "Original"; }
 	~Foo() {}
