@@ -26,7 +26,9 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
+      with:
+        vs-version: '[16.4,16.5)'
 
     - name: Restore NuGet packages
       working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -36,7 +38,7 @@ jobs:
       working-directory: ${{env.GITHUB_WORKSPACE}}
       # Add additional options to the MSBuild command line here (like platform or verbosity level).
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: msbuild Mockingbird.sln /p:Configuration=Release /p:Platform="x86"
+      run: msbuild Mockingbird.sln /p:Configuration=Release /p:Platform="x86" /Zc:preprocessor
       
     - name: Test
       run: Release\MockingbirdTest.exe
