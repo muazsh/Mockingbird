@@ -88,8 +88,8 @@ m_##FuncName##overloadedMethodNumber##CallCounter++;                            
 return m_##FuncName##Class##overloadedMethodNumber.m_func(__VA_ARGS__);                                                               \
 }
 
-#define CAT(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,...) a##b##c##d##e##f##g##h##i##j##k##l##m##n##o##p##q##r##s##t##u##v##w##x##y##z
-#define CONCAT(...) CAT(__VA_ARGS__,,,,,,,,,,,,,,,,,,,,,,,,,,,)
+#define CAT(param1,param2,param3,param4,param5,param6,param7,param8,param9,param10,param11,param12,param13,param14,param15,param16,param17,param18,param19,param20,...) param1##param2##param3##param4##param5##param6##param7##param8##param9##param10##param11##param12##param13##param14##param15##param16##param17##param18##param19##param20
+#define CONCAT(...) CAT(__VA_ARGS__,,,,,,,,,,,,,,,,,,,,,,) //https://stackoverflow.com/a/74729170/1149948
 
 
 #define FUNC_INJECTION_SET(FuncName, Params, Substitute)                                                                              \
