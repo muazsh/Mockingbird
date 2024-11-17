@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "FooTestFixture.h"
+#include "FooMock.h"
+#include <gtest/gtest.h>
 
 std::string g_checkDestructorCalled = "The Injected Destructor Is NOT Called.";
 

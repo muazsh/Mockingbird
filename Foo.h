@@ -1,7 +1,11 @@
 #pragma once
-#include "MyStruct.h"
+
 #include <memory>
 #include <string>
+
+struct MyStruct {
+	int x, y;
+};
 
 class Foo {
 public:
