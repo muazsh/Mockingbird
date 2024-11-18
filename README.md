@@ -1,6 +1,6 @@
 # Mockingbird
 
-[![MSBuild](https://github.com/muazsh/Mockingbird/actions/workflows/MSBuildAndTest.yml/badge.svg)](https://github.com/muazsh/Mockingbird/actions/workflows/MSBuildAndTest.yml)
+[![CMake on multiple platforms](https://github.com/muazsh/Mockingbird/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/muazsh/Mockingbird/actions/workflows/cmake-multi-platform.yml)
 
 :white_check_mark: All C++11 compilers and higher are supported.
 
