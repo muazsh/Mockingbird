@@ -11,8 +11,17 @@
 
 #include <functional>
 
+#define ADD_TYPENAME1(x) typename x
+#define ADD_TYPENAME2(x1, x2) typename x1, ADD_TYPENAME1(x2) 
+#define ADD_TYPENAME3(x1, x2, x3) typename x1, ADD_TYPENAME2(x2, x3) 
+#define ADD_TYPENAME4(x1, x2, x3, x4) typename x1, ADD_TYPENAME3(x2, x3, x4) 
+#define ADD_TYPENAME5(x1, x2, x3, x4, x5) typename x1, ADD_TYPENAME1(x2, x3, x4, x5)
+
+#define SELECT_MACRO(_1, _2, _3, _4, _5, NAME, ...) NAME
+#define ADD_TYPENAME(...) SELECT_MACRO(__VA_ARGS__, ADD_TYPENAME5, ADD_TYPENAME4, ADD_TYPENAME3, ADD_TYPENAME2, ADD_TYPENAME1)(__VA_ARGS__)
+
 #define START_MOCK_TEMPLATE(MockingClass, MockedClass, ...)                                                                           \
-template<__VA_ARGS__>                                                                                                                 \
+template<ADD_TYPENAME(__VA_ARGS__)>                                                                                                                 \
 class MockingClass : public MockedClass<__VA_ARGS__> {                          
 
 #define FUNCTION_TEMPLATE_PREFIX(FuncName,...)                                                                                        \

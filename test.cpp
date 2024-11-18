@@ -229,7 +229,7 @@ TEST(Mockingbird, Dtor) {
 	EXPECT_EQ("The Injected Destructor Is Called.", g_checkDestructorCalled);
 }
 
-START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, typename T, typename E)
+START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, T, E)
 FUNCTION_TEMPLATE(Sum, T, (T x, E y), return x + y, x, y)
 FUNCTION_TEMPLATE(SumConst, T, (T x, E y)const, return x + y, x, y)
 FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return x + y + z, 1, x, y, z)
