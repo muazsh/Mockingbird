@@ -25,6 +25,7 @@ Mockingbird provides the following Macros to enable mocking any class:
 4.	A pointer to a substitute function.
 5.	A number for numbering the overloading methods.
 6.	The signature arguments names separated by commas.
+-	`FUNC`: This macro can be used instead of `FUNCTION` and `FUNCTION_OVERLOADING` with no need to number the overloaded methods, the injection and counter call Get methods of overloaded methods are distiguished via parameters names, so it simplifies the framework usage, but the methods parametes should not be more than 20 parameter.
 -	`END_MOCK`: This must be the last macro call and it takes 1 argument: the name of the generated mocking class (optionally).
 
 For each mocked method `Fx` in the mocking class there will be 3 corresponding methods:
