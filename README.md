@@ -8,7 +8,7 @@ Mockingbird is a mocking framework for c++, it is a simple yet a powerful framew
 
 I am using here the term `method` to refer to a class member function and the term `function` to refer to a free function.   
 
-For a class to be mocked Mockingbird creates a mocking class and then the developer should instantiate that mocking class and inject (stub) functions instead of the methods which are to be mocked.
+For a class to be mocked Mockingbird creates a mocking class and then the developer should instantiate that mocking class and inject (stub) functions/lambdas instead of the methods which are to be mocked, so you need to create the mocking class once, then you can inject new behaviours on the fly, even several behaviours for the same method in the same test.
 
 Mockingbird provides the following Macros to enable mocking any class:
 -	`START_MOCK`: This must be the first macro call and it takes 2 arguments: the name of the generated mocking class and the name of the mocked class.
@@ -47,13 +47,17 @@ Mockingbird supports mocking class templates, but the usage mechanism deviates a
 -	Hiding any non-virtual method (const and overloaded).
 -	Counting the number of calls of mocked/hidden methods.
 -	Supporting spying the original method.
--	Class template mock.       
+-	Class template mock.     
+
+**Setup**:
+
+-	Just copy the ~140 LoC `Mockingbird.hpp` into your code and include it to start mocking your classes.
 
 **Limitations**:
--	Mocked class must have a default constructor.
 
+-	When injecting lambdas as a method substitute, that lambda is not allowed to have a capture.
 
-Here are two examples:
+**Usage**:
 - **Simple example**:
 
 Assume having the following legacy code and `Foo` class needs to be mocked:
