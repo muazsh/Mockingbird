@@ -17,14 +17,15 @@ public:
 	virtual MyStruct MakeSpecialCopyMyStruct(MyStruct&& myStruct) const { return MyStruct{ myStruct.x, myStruct.y }; }
 	virtual int GetTen() { return 10; }
 	std::string GetString() { return "Original"; }
-	~Foo() {}
+	virtual ~Foo() {}
 };
 
 template<class T, class E>
 class TemplatedFoo {
 public:
 	virtual T Sum(T x, E y) = 0;
-	virtual T SumConst(T x, E y) const = 0;
 	virtual T Sum(T x, E y, T z) = 0;
-	~TemplatedFoo() {}
+	virtual T SumConst(T x, E y) const = 0;
+	virtual T SumConst(T x, E y, int&& z) const = 0;
+	virtual ~TemplatedFoo() {}
 };

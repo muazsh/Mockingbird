@@ -30,3 +30,10 @@ FUNC(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct)const, &MakeSp
 FUNCTION(MakeSpecialCopyMyStruct, MyStruct, (MyStruct&& myStructRLR)const, &MakeSpecialCopyMyStructDummy2, std::move(myStructRLR))
 FUNC(GetString, std::string, (), &GetStringDummy)
 END_MOCK(FooMock2)
+
+START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, T, E)
+FUNCTION_TEMPLATE(Sum, T, (T x, E y), return 0, x, y)
+FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return 0, 1, x, y, z)
+FUNCTION_TEMPLATE_CONST(SumConst, T, (T x, E y), return 0, x, y)
+FUNCTION_TEMPLATE_OVERLOADING_CONST(SumConst, T, (T x, E y, int&& z), return 0, 1, x, y, std::move(z))
+END_MOCK(FooTemplatedMock)

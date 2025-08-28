@@ -229,21 +229,29 @@ TEST(Mockingbird, Dtor) {
 	EXPECT_EQ("The Injected Destructor Is Called.", g_checkDestructorCalled);
 }
 
-START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, T, E)
-FUNCTION_TEMPLATE(Sum, T, (T x, E y), return x + y, x, y)
-FUNCTION_TEMPLATE(SumConst, T, (T x, E y)const, return x + y, x, y)
-FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return x + y + z, 1, x, y, z)
-END_MOCK(FooTemplatedMock)
-
+double sumMock1(double x, float y, double z) {
+	return x + y + z;
+}
 TEST(Mockingbird, Templates) {
 	FooTemplatedMock<double, float> fooTemplatedMock;
-	EXPECT_EQ(2, fooTemplatedMock.Sum(1,1));
-	EXPECT_EQ(2, fooTemplatedMock.SumConst(1, 1));
-	EXPECT_EQ(3, fooTemplatedMock.Sum(1, 1, 1));
+	fooTemplatedMock.InjectSum(&sumMock1);
+
+	auto sumMock2 = [](double x, float y) {return x + y; };
+	fooTemplatedMock.InjectSum(sumMock2);
+	fooTemplatedMock.InjectSumConst(sumMock2);
+
+	auto sumMock3 = [](double x, float y, int&& z) {return x + y + z; };
+	fooTemplatedMock.InjectSumConst(sumMock3);
+
+	EXPECT_EQ(2, fooTemplatedMock.Sum(1,1)); // Sum of 2 parameters
 	EXPECT_EQ(1, fooTemplatedMock.GetSumCallCounter());
-	fooTemplatedMock.SumConst(2, 2);
+	EXPECT_EQ(2, fooTemplatedMock.SumConst(1, 1)); // const Sum of 2 parameters
+	EXPECT_EQ(4, fooTemplatedMock.SumConst(2, 2)); // const Sum of 2 parameters
 	EXPECT_EQ(2, fooTemplatedMock.GetSumConstCallCounter());
-	fooTemplatedMock.Sum(1, 1, 1);
-	fooTemplatedMock.Sum(1, 1, 1);
-	EXPECT_EQ(3, fooTemplatedMock.GetSumCallCounter1());
+	EXPECT_EQ(3, fooTemplatedMock.Sum(1, 1, 1)); // Sum of 3 parameters
+	EXPECT_EQ(8, fooTemplatedMock.Sum(1, 3, 4)); // Sum of 3 parameters
+	EXPECT_EQ(0, fooTemplatedMock.Sum(0, 0, 0)); // Sum of 3 parameters
+	EXPECT_EQ(3, fooTemplatedMock.GetSum1CallCounter());
+	EXPECT_EQ(6, fooTemplatedMock.SumConst(1, 2, 3)); // Sum of 3 parameters
+	EXPECT_EQ(1, fooTemplatedMock.GetSumConst1CallCounter());
 }

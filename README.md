@@ -35,11 +35,13 @@ For each mocked method `Fx` in the mocking class there will be 3 corresponding m
 
 **Class Template Mock:**
 
-Mockingbird supports mocking class templates, but the usage mechanism deviates a bit from mocking a no template class, where for mocking a no template class Mockingbird allows building one mocking class and then using that mock anywhere and simply injecting mocking methods, so one mock class and the behavior can be changed by injecting differnt mocking methods, however; for tempalte classes a new mock to be created for each new behavior and no injection is possible because injection is a run-time operation, the following macros are for class and function template:
+Mockingbird supports mocking class templates, create a mock once and use it in any test then, new behaviours can be injected on the fly in the test, like the non-templated case previously, the following macros are special for class template:
 
 -	`START_MOCK_TEMPLATE(MockingClass, MockedClass, ...)`
--	`FUNCTION_TEMPLATE(FuncName,ReturnType, Signature, Expression, .../*signature variables*/)`: `Expression` is the mock behavior.
+-	`FUNCTION_TEMPLATE(FuncName,ReturnType, Signature, Expression, .../*signature variables*/)`: `Expression` is the mock default behavior.
+-   `FUNCTION_TEMPLATE_CONST`
 -	`FUNCTION_TEMPLATE_OVERLOADING`
+-   `FUNCTION_TEMPLATE_OVERLOADING_CONST`
 
 **Features**:
 -	All C++11 compilers and higher should compile Mockingbird, Github pipeline runs tests against MSVC, GCC and Clang.
