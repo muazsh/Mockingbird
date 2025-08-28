@@ -174,21 +174,23 @@ EXPECT_EQ("Mock", fooMock.GetString());
 ```
 It is important to note that the number 1 in `GetMakeSpecialCopyMyStruct1CallCounter` is the number passed in the fixture `FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)` before `x` parameter in this example. 
 
-For class templates, as mentioned previously a new mock should be introduced for each new needed behavior (no injection is possible)(see tests):
-```
+For class templates, likewise lambdas/functions can be injected in the tests (see template tests):
+```c++
 template<class T, class E>
 class TemplatedFoo {
 public:
 	virtual T Sum(T x, E y) = 0;
-	virtual T SumConst(T x, E y) const = 0;
 	virtual T Sum(T x, E y, T z) = 0;
+	virtual T SumConst(T x, E y) const = 0;
+	virtual T SumConst(T x, E y, int&& z) const = 0;
 	virtual ~TemplatedFoo() {}
 };
 
-START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, typename T, typename E)
-FUNCTION_TEMPLATE(Sum, T, (T x, E y), return x + y, x, y)
-FUNCTION_TEMPLATE(SumConst, T, (T x, E y)const, return x + y, x, y)
-FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return x + y + z, 1, x, y, z)
+START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, T, E)
+FUNCTION_TEMPLATE(Sum, T, (T x, E y), return 0, x, y)
+FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return 0, 1, x, y, z)
+FUNCTION_TEMPLATE_CONST(SumConst, T, (T x, E y), return 0, x, y)
+FUNCTION_TEMPLATE_OVERLOADING_CONST(SumConst, T, (T x, E y, int&& z), return 0, 1, x, y, std::move(z))
 END_MOCK(FooTemplatedMock)
 ```
 **Notes**: 
