@@ -2,201 +2,227 @@
 
 [![CMake on multiple platforms](https://github.com/muazsh/Mockingbird/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/muazsh/Mockingbird/actions/workflows/cmake-multi-platform.yml)
 
-:white_check_mark: All C++11 compilers and higher are supported.
+A **lightweight, simple and powerful mocking framework for C++11 and above**.
 
-Mockingbird is a mocking framework for C++, it is a simple yet powerful framework, Mockingbird provides mocking virtual/non-virtual methods whether it is overloaded or not, const or not, template or not, and also it provides counting the number of calls of a mocked method.
+Mockingbird equipes the created mock with mechanism to inject new behaviours in runtime instead of the target class methods. 
 
-I am using here the term `method` to refer to a class member function and the term `function` to refer to a free function.   
+---
 
-For a class to be mocked Mockingbird creates a mocking class and then the developer should instantiate that mocking class and inject (stub) functions/lambdas instead of the methods which are to be mocked, so you need to create the mocking class once, then you can inject new behaviours on the fly, even several behaviours for the same method in the same test.
+## ✨ Features
+- ✅ Cross-platform, works with **all C++11+ compilers** (this github pipeline runs tests against MSVC, GCC, Clang).
+- 🎯 Mock any **virtual** method and hide **non-virtual** ones.
+- 🔢 Call counters for every mocked method.
+- 🔍 Spying on original implementations supported.
+- 📦 Header-only (`Mockingbird.hpp`, ~140 LoC).
+- 🧩 Full **class template mocking** support.
+- ✅ Can be integrated with any testing framework like Catch2, gtest and Microsoft Unit Testing Framework.
+- 🎯 No macros in tests, macros are used only when defining the mock.
 
-Mockingbird provides the following Macros to enable mocking any class:
--	`START_MOCK`: This must be the first macro call and it takes 2 arguments: the name of the generated mocking class and the name of the mocked class.
--	`FUNCTION`: This macro is to setup an injection functionality for any method, it takes the following arguments:
-1.	Method name.
-2.	Method return type.
-3.	Method signature surrounded by parentheses and followed by `const` if the method is `const`.
-4.	A pointer to a substitute function.
-5.	The signature parameters names separated by commas.    
--	`FUNCTION_OVERLOADING`: This macro is to setup an injection functionality for the overloaded methods, it takes the following arguments:
-1.	Method name.
-2.	Method return type.
-3.	Method signature surrounded by parentheses and followed by `const` if the method is `const`.
-4.	A pointer to a substitute function.
-5.	A number for numbering the overloading methods.
-6.	The signature arguments names separated by commas.
--	`FUNC`: This macro can be used instead of `FUNCTION` and `FUNCTION_OVERLOADING` with no need to number the overloaded methods, the injection and counter call Get methods of overloaded methods are distiguished via parameters names, so it simplifies the framework usage, but the methods parameters should not be more than 20 parameter and there should be no rvalue reference parameter, in those 2 cases `FUNCTION` and `FUNCTION_OVERLOADING` usage is unavoidable.
--	`END_MOCK`: This must be the last macro call and it takes 1 optional argument: the name of the generated mocking class.
+---
 
-For each mocked method `Fx` in the mocking class there will be 3 corresponding methods:
-1.	`Fx`: The method itself as a mock.
-2.	`InjectFx`: This is to stub a substitute function.
-3.	`GetFxCallCounter`: Returns the number of calls of the mocked method.
+## 🚀 Quick Start
 
-**Class Template Mock:**
+### Installation
+Just copy [`Mockingbird.hpp`](./Mockingbird.hpp) into your project and include it:
 
-Mockingbird supports mocking class templates, create a mock once and use it in any test then, new behaviours can be injected on the fly in the test, like the non-templated case previously, the following macros are special for class template:
-
--	`START_MOCK_TEMPLATE(MockingClass, MockedClass, ...)`
--	`FUNCTION_TEMPLATE(FuncName,ReturnType, Signature, Expression, .../*signature variables*/)`: `Expression` is the mock default behavior.
--   `FUNCTION_TEMPLATE_CONST`
--	`FUNCTION_TEMPLATE_OVERLOADING`
--   `FUNCTION_TEMPLATE_OVERLOADING_CONST`
-
-**Features**:
--	All C++11 compilers and higher should compile Mockingbird, Github pipeline runs tests against MSVC, GCC and Clang.
--	Mocking any virtual method (const and overloaded).
--	Hiding any non-virtual method (const and overloaded).
--	Counting the number of calls of mocked/hidden methods.
--	Supporting spying the original method.
--	Class template mock.     
-
-**Setup**:
-
--	Just copy the ~140 LoC `Mockingbird.hpp` into your code and include it to start mocking your classes.
-
-**Limitations**:
-
--	When injecting lambdas as a method substitute, that lambda is not allowed to have a capture.
-
-**Usage**:
-- **Simple example**:
-
-Assume having the following legacy code and `Foo` class needs to be mocked:
-```c++
-struct MyStruct{
-	int x, y;
-};
-
-class Foo{
-public:
-	virtual const MyStruct CreateMyStruct(int x, int y) { return MyStruct{ x,y }; }
-}; 
+```cpp
+#include "Mockingbird.hpp"
 ```
 
-Then a testing fixture should be written only once for the whole project:
-```c++
-const MyStruct CreateMyStructDummy(int x, int y) { return MyStruct{0,0}; } // default mock behaviour.
+No build system integration required.
+
+When building using MSVC, the standard conforming preprocessor should be incorporated, by setting **/Zc:preprocessor** compiler flag.
+
+---
+
+## 📘 API Reference
+
+### Core Macros
+| Macro | Purpose | Notes |
+|-------|----------|-------|
+| `START_MOCK` | Begin mock definition | Must be first macro |
+| `FUNCTION` | Mock a single method | Works with non-overloaded methods |
+| `FUNCTION_OVERLOADING` | Mock an overloaded method | Requires overload number |
+| `FUNC` | Shortcut for `FUNCTION` & `FUNCTION_OVERLOADING` | Limited: ≤20 params, no rvalue refs |
+| `END_MOCK` | End mock definition | Must be last macro |
+
+#### Core Macros Parameters
+
+-	`START_MOCK(MockClass, TargetClass)`: 
+    1.  MockClass: Mock class name.
+    2.  TargetClass: Target class name.
+-	`FUNCTION(Name, ReturnType, Signature, SubFn, Args...)`:
+    1.	Name: The Method name.
+    2.	ReturnType: Method return type.
+    3.	Signature: Method signature surrounded by parentheses and followed by `const` if the method is `const`.
+    4.	SubFn: A pointer to a substitute function.
+    5.	Args: The signature parameters names separated by commas.    
+-	`FUNCTION_OVERLOADING(Name, ReturnType, Signature, SubFn, Disc, Args...)`: All are same as `FUNCTION` macro paramerters, in addition to:
+    1.	Disc: A dicriminator, to distiguish between overloaded methods.
+-	`FUNC(Name, ReturnType, Signature, SubFn, Args...)`: Same as `FUNCTION` macro paramerters.
+
+-	`END_MOCK(MockClass)`: 
+    1.  MockClass: Mock class name (optional parameter).
+
+
+### Template Macros
+| Macro | Purpose |
+|-------|----------|
+| `START_MOCK_TEMPLATE(MockClass, TargetClass, Types...)` | Begin template mock |
+| `FUNCTION_TEMPLATE(FuncName,ReturnType, Signature, Expression, Args...)` | Mock template method |
+| `FUNCTION_TEMPLATE_CONST(FuncName,ReturnType, Signature, Expression, Args...)` | Mock const template method |
+| `FUNCTION_TEMPLATE_OVERLOADING(FuncName,ReturnType, Signature, Expression, Disc, Args...)` | Overloaded template mock |
+| `FUNCTION_TEMPLATE_OVERLOADING_CONST(FuncName,ReturnType, Signature, Expression, Disc, Args...)` | Const overloaded template mock |
+
+#### Template Macros Parameters
+
+All parameters are same as core macros paramerters, except:
+
+- Types: In `START_MOCK_TEMPLATE` this variable parameters are the template types.
+- Expression: In `FUNCTION_TEMPLATE*` macros, instead of `SubFn` in core macros, this expression is the default function template behaviour, 
+
+
+### Generated Methods
+For each mocked method `Fx`, Mockingbird generates:
+1. `Fx(...)` → The mock method.
+2. `InjectFx(...)` → Inject substitute function/lambda.
+3. `GetFxCallCounter()` → Retrieve number of calls.
+
+---
+
+## 📌 Important Notes
+- `FUNC` **cannot** be used when:
+  - The mocked method has **more than 20 parameters**, or
+  - The mocked method has an **rvalue reference parameter** (`T&&`).
+
+  In these cases, you must use `FUNCTION` or `FUNCTION_OVERLOADING` instead.
+
+- If no substitute is injected, the **dummy function** (or the **Expression** in template case) in the fixture is used.
+- Non-virtual methods, when hidden, **lose polymorphism**.
+- Injected lambdas **cannot have captures**.
+- The [Mockingbird extension](https://marketplace.visualstudio.com/items?itemName=MouazChamieh.mockingbirdextension) can auto-generate mocks using AI.
+
+---
+
+## 📑 Usage Examples
+
+### 1️⃣ Basic Example
+```cpp
+struct MyStruct { int x, y; };
+
+class Foo {
+public:
+    virtual const MyStruct CreateMyStruct(int x, int y) { return {x, y}; }
+};
+
+const MyStruct CreateMyStructDummy(int x, int y) { return {0, 0}; }
 
 START_MOCK(FooMock, Foo)
-FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDummy, x, y)
+    FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDummy, x, y)
 END_MOCK(FooMock)
 ```
 
-Then in the tests if a method needs some desired behaviour a substitute function or lambda (without capture) should be intorduced, for example:
-```c++
-const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
-```
-and finally injecting the substitute and using `MockFoo` object as if it is of `Foo` like:
-```c++
+In tests:
+```cpp
 FooMock fooMock;
-fooMock.InjectCreateMyStruct(CreateMyStructSubstitute); // Mocking function injection.
-auto created = fooMock.CreateMyStruct(5,5);
-EXPECT_EQ(15, created.x);
-EXPECT_EQ(15, created.y);
+fooMock.InjectCreateMyStruct([](int x, int y){ return MyStruct{x+10, y+10}; });
+
+auto result = fooMock.CreateMyStruct(5, 5);
+EXPECT_EQ(15, result.x);
+EXPECT_EQ(15, result.y);
 ```
 
-As an alternative of function injection, a lambda can be injected as well, but it should have no capture, like:
-```c++
-FooMock fooMock;
-auto lambda = [](int x, int y)->const MyStruct{ return MyStruct{ x + 10, y + 10 }; };
-fooMock.InjectCreateMyStruct(lambda); // Mocking behavior injection.
-auto created = fooMock.CreateMyStruct(5,5);
-EXPECT_EQ(15, created.x);
-EXPECT_EQ(15, created.y);
-```
+---
 
-- **Comprehensive example**:
+### 2️⃣ Comprehensive Example (Overloading, Call Counters, Spying)
 
-This example includes overloading, verifying number of calls and spying the original behaviour.
-
-Assume having the following legacy code and `Foo` class needs to be mocked:
-``` c++
-struct MyStruct{
-	int x, y;
-};
-
-class Foo{
+**Foo Class**
+```cpp
+class Foo {
 public:
 	virtual void ResetMyStruct(MyStruct& myStruct) = 0;
 	virtual const MyStruct CreateMyStruct(int x, int y) { return MyStruct{ x,y }; };
 	virtual const MyStruct CreateMyStruct(int x) { return MyStruct{ x,x }; };
 	virtual MyStruct MakeSpecialCopyMyStruct(const std::shared_ptr<MyStruct>& myStruct) const { return MyStruct{ myStruct->x, myStruct->y }; }
 	virtual MyStruct MakeSpecialCopyMyStruct(const MyStruct& myStruct) const { return MyStruct{ myStruct.x, myStruct.y }; }
+	virtual MyStruct MakeSpecialCopyMyStruct(MyStruct&& myStruct) const { return MyStruct{ myStruct.x, myStruct.y }; }
 	virtual int GetTen() { return 10; }
 	std::string GetString() { return "Original"; }
+	virtual ~Foo() {}
 };
 ```
-Assuming all methods except of `GetTen` are to be mocked, then a test fixture for the class `Foo` should be intorduced using **Mockingbird** macros and dummy versions of methods to be mocked, this fixture gets written only once for a project where `Foo` appears in tests as a mock:
-```c++
-void ResetMyStructDummy(MyStruct& myStruct) {}
-const MyStruct CreateMyStructDummy(int x, int y) { return MyStruct(); }
-const MyStruct CreateMyStructDummy1(int x) { return MyStruct(); }
-MyStruct MakeSpecialCopyMyStructDummy(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct(); } // This is a static method wihch cannot be const
-MyStruct MakeSpecialCopyMyStructDummy1(const MyStruct& myStruct) { return MyStruct(); }
-std::string GetStringDummy() { return ""; }
+
+**Mock Definition**:
+```cpp
+void ResetMyStructDefault(MyStruct& myStruct) {}
+const MyStruct CreateMyStructDefault(int x, int y) { return MyStruct{ 0,0 }; }
+const MyStruct CreateMyStructDefault1(int x) { return MyStruct{ 0,0 }; }
+MyStruct MakeSpecialCopyMyStructDefault(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ 0,0 }; }
+MyStruct MakeSpecialCopyMyStructDefault1(const MyStruct& myStruct) { return MyStruct{ 0,0 }; }
+MyStruct MakeSpecialCopyMyStructDefault2(MyStruct&& myStruct) { return MyStruct{ 0,0 }; }
+std::string GetStringDefault() { return ""; }
 
 START_MOCK(FooMock, Foo)
-FUNCTION(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructDummy, myStruct)
-FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDummy, x, y)
-FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)
-FUNCTION(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStruct)const, &MakeSpecialCopyMyStructDummy, myStruct)
-FUNCTION_OVERLOADING(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct)const, &MakeSpecialCopyMyStructDummy1, 1, myStruct)
-FUNCTION(GetString, std::string, (), &GetStringDummy)
+    FUNC(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructDefault, myStruct)
+    FUNC(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDefault, x, y)
+    FUNC(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDefault1, x)
+    FUNC(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStructPtr)const, &MakeSpecialCopyMyStructDefault, myStructPtr)
+    FUNC(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct)const, &MakeSpecialCopyMyStructDefault1, myStruct)
+    FUNCTION(MakeSpecialCopyMyStruct, MyStruct, (MyStruct&& myStructRLR)const, &MakeSpecialCopyMyStructDefault2, std::move(myStructRLR))
+    FUNC(GetString, std::string, (), &GetStringDefault)
 END_MOCK(FooMock)
 ```
-Note that when calling one of `FUNCTION` macros, the parameters names in the end must be the same as the names in the passed signature, so in case of ` CreateMyStruct ` `x,y` in the end are named same as in signature argument `(int x, int y)`.
-Also note when mocking an overloaded method via `FUNCTION_OVERLOADING`, the passed number N will show up in the method `GetFxNCallCounter` to distinguish what overloaded method calls number is wanted.
 
-In the tests, a substitute function/lambda should be introduced for each method that needs a new behaviour:
-``` c++
-void ResetMyStructSubstitute(MyStruct& myStruct) { myStruct.x = 10; myStruct.y = 10; }
-const MyStruct CreateMyStructSubstitute(int x, int y) { return MyStruct{ x + 10, y + 10 }; }
-const MyStruct CreateMyStructSubstitute1(int x) { return MyStruct{ x + 5, x + 5 }; }
-MyStruct MakeSpecialCopyMyStructSubstitute(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ myStruct->x + 10, myStruct->y + 10 }; }
-MyStruct MakeSpecialCopyMyStructSubstitute1(const MyStruct& myStruct) { return MyStruct{ myStruct.x + 15, myStruct.y + 15 }; }
-std::string GetStringSubstitute() { return "Mock"; }
-```
-Finally substitutes need to be injected into an instance of `MockFoo` which can be used as if it is of a `Foo` class like:
-``` c++
-MyStruct myStruct{ 1, 1 };
+**In Tests**:
+```cpp
 FooMock fooMock;
+fooMock.InjectCreateMyStruct([](int x, int y){ return MyStruct{x+10, y+10}; });
 
-fooMock.InjectMakeSpecialCopyMyStruct(MakeSpecialCopyMyStructSubstitute1); // Mocking methods injection.
-auto specialCopy = fooMock.MakeSpecialCopyMyStruct(myStruct);
-EXPECT_EQ(16, created.x);
-EXPECT_EQ(16, created.y);
-EXPECT_EQ(1, fooMock.GetMakeSpecialCopyMyStruct1CallCounter());
-EXPECT_EQ(10, fooMock.GetTen()); // Spying.
-
-fooMock.InjectGetString(GetStringSubstitute);
-EXPECT_EQ("Mock", fooMock.GetString());
+auto myStruct = fooMock.CreateMyStruct(5,5);
+EXPECT_EQ(15, myStruct.x);
+EXPECT_EQ(15, myStruct.y);
+EXPECT_EQ(1, fooMock.GetCreateMyStructCallCounter());
+EXPECT_EQ(10, fooMock.GetTen()); // Spy real implementation since not presented in the mock definition.
 ```
-It is important to note that the number 1 in `GetMakeSpecialCopyMyStruct1CallCounter` is the number passed in the fixture `FUNCTION_OVERLOADING(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDummy1, 1, x)` before `x` parameter in this example. 
 
-For class templates, likewise lambdas/functions can be injected in the tests (see template tests):
-```c++
+---
+
+### 3️⃣ Template Example
+
+```cpp
 template<class T, class E>
 class TemplatedFoo {
 public:
-	virtual T Sum(T x, E y) = 0;
-	virtual T Sum(T x, E y, T z) = 0;
-	virtual T SumConst(T x, E y) const = 0;
-	virtual T SumConst(T x, E y, int&& z) const = 0;
-	virtual ~TemplatedFoo() {}
+    virtual T Sum(T x, E y) = 0;
+    virtual T Sum(T x, E y, T z) = 0;
+    virtual T SumConst(T x, E y) const = 0;
+    virtual T SumConst(T x, E y, int&& z) const = 0;
 };
 
 START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, T, E)
-FUNCTION_TEMPLATE(Sum, T, (T x, E y), return 0, x, y)
-FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return 0, 1, x, y, z)
-FUNCTION_TEMPLATE_CONST(SumConst, T, (T x, E y), return 0, x, y)
-FUNCTION_TEMPLATE_OVERLOADING_CONST(SumConst, T, (T x, E y, int&& z), return 0, 1, x, y, std::move(z))
+    FUNCTION_TEMPLATE(Sum, T, (T x, E y), return 0, x, y)
+    FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return 0, 1, x, y, z)
+    FUNCTION_TEMPLATE_CONST(SumConst, T, (T x, E y), return 0, x, y)
+    FUNCTION_TEMPLATE_OVERLOADING_CONST(SumConst, T, (T x, E y, int&& z), return 0, 1, x, y, std::move(z))
 END_MOCK(FooTemplatedMock)
 ```
-**Notes**: 
--	For a mocked method if a substitute is not injected the default behavior will be the behaviour of the dummy function in the fixture.
--	When hiding a non-virtual method polymorphism won't work anymore (of course because the method is not virtual, see Hide test in test.cpp).
--	Despite writing Mockingbird mocks is straightforward and simple, this tool https://marketplace.visualstudio.com/items?itemName=MouazChamieh.mockingbirdextension uses AI to auto generate mocks based on Mockingbird rules. 
+
+---
+
+## ⚠️ Limitations
+- Injected lambdas **cannot have captures**.
+- For methods with >20 parameters or rvalue refs, use `FUNCTION` / `FUNCTION_OVERLOADING` instead of `FUNC`.
+
+---
+
+## 🔧 Tooling
+- [Visual Studio Extension (auto-mock generator)](https://marketplace.visualstudio.com/items?itemName=MouazChamieh.mockingbirdextension)
+
+---
+
+## 🤝 Contributing
+Contributions, issues, and feature requests are welcome!
+
 
 
 
