@@ -251,7 +251,7 @@ TEST(Mockingbird, Templates) {
 	EXPECT_EQ(3, fooTemplatedMock.Sum(1, 1, 1)); // Sum of 3 parameters
 	EXPECT_EQ(8, fooTemplatedMock.Sum(1, 3, 4)); // Sum of 3 parameters
 	EXPECT_EQ(0, fooTemplatedMock.Sum(0, 0, 0)); // Sum of 3 parameters
-	EXPECT_EQ(3, fooTemplatedMock.GetSum1CallCounter());
-	EXPECT_EQ(6, fooTemplatedMock.SumConst(1, 2, 3)); // Sum of 3 parameters
-	EXPECT_EQ(1, fooTemplatedMock.GetSumConst1CallCounter());
+	EXPECT_EQ(3, fooTemplatedMock.GetSumOverloadWithZCallCounter());
+	EXPECT_EQ(6, fooTemplatedMock.SumConst(1, 2, std::move(3))); // Sum of 3 parameters
+	EXPECT_EQ(1, fooTemplatedMock.GetSumConstRvalRefCallCounter());
 }

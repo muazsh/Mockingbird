@@ -8,15 +8,15 @@ Mockingbird equipes the created mock with mechanism to inject new behaviours in 
 
 ---
 
-## ✨ Features
-- ✅ Cross-platform, works with **all C++11+ compilers** (this github pipeline runs tests against MSVC, GCC, Clang).
-- 🎯 Mock any **virtual** method and hide **non-virtual** ones.
-- 🔢 Call counters for every mocked method.
-- 🔍 Spying on original implementations supported.
-- 📦 Header-only (`Mockingbird.hpp`, ~140 LoC).
-- 🧩 Full **class template mocking** support.
-- ✅ Can be integrated with any testing framework like Catch2, gtest and Microsoft Unit Testing Framework.
-- 🎯 No macros in tests, macros are used only when defining the mock.
+## Features
+-  Cross-platform, works with **all C++11+ compilers** (this github pipeline runs tests against MSVC, GCC, Clang).
+-  Mock any **virtual** method and hide **non-virtual** ones.
+-  Call counters for every mocked method.
+-  Spying on original implementations supported.
+-  Header-only (`Mockingbird.hpp`, ~130 LoC).
+-  Full **class template mocking** support.
+-  Can be integrated with any testing framework like Catch2, gtest and Microsoft Unit Testing Framework.
+-  No macros in tests, macros are used only to define the mock class.
 
 ---
 
@@ -37,50 +37,40 @@ When building using MSVC, the standard conforming preprocessor should be incorpo
 
 ## 📘 API Reference
 
-### Core Macros
+### Macros
 | Macro | Purpose | Notes |
 |-------|----------|-------|
 | `START_MOCK` | Begin mock definition | Must be first macro |
-| `FUNCTION` | Mock a single method | Works with non-overloaded methods |
-| `FUNCTION_OVERLOADING` | Mock an overloaded method | Requires overload number |
-| `FUNC` | Shortcut for `FUNCTION` & `FUNCTION_OVERLOADING` | Limited: ≤20 params, no rvalue refs |
+| `START_MOCK_TEMPLATE` | Begin class template mock definition | Must be first macro in case of class template mock |
+| `FUNCTION` | Mock a `non-const` method | Works when no overloading yet |
+| `FUNCTION_CONST` | Mock a `const` method | Works when no overloading yet |
+| `FUNCTION_OVERLOAD` | Mock a `non-const` overloaded method | Requires overload discriminator |
+| `FUNCTION_OVERLOAD_CONST` | Mock a `const` overloaded method | Requires overload discriminator |
+| `FUNC` | Shortcut for `FUNCTION`, `FUNCTION_CONST`, `FUNCTION_OVERLOAD` and `FUNCTION_OVERLOAD_CONST` | Limited: ≤20 params, no rvalue refs params |
 | `END_MOCK` | End mock definition | Must be last macro |
 
-#### Core Macros Parameters
+#### Macros Parameters
 
 -	`START_MOCK(MockClass, TargetClass)`: 
     1.  MockClass: Mock class name.
     2.  TargetClass: Target class name.
--	`FUNCTION(Name, ReturnType, Signature, SubFn, Args...)`:
+-	`START_MOCK_TEMPLATE(MockClass, TargetClass, Types...)`: Same as `START_MOCK` parameters, in addition to: 
+    1.  Types: Variable arguments represent the template types.
+-	`FUNCTION(Name, ReturnType, Signature, Expression, Args...)`:
     1.	Name: The Method name.
     2.	ReturnType: Method return type.
-    3.	Signature: Method signature surrounded by parentheses and followed by `const` if the method is `const`.
-    4.	SubFn: A pointer to a substitute function.
+    3.	Signature: Method signature surrounded by parentheses.
+    4.	Expression: The method default behaviour, should contain no commas.
     5.	Args: The signature parameters names separated by commas.    
--	`FUNCTION_OVERLOADING(Name, ReturnType, Signature, SubFn, Disc, Args...)`: All are same as `FUNCTION` macro paramerters, in addition to:
+-	`FUNCTION_CONST(Name, ReturnType, Signature, Expression, Args...)`: Same as `FUNCTION` parameters.
+-	`FUNCTION_OVERLOAD(Name, ReturnType, Signature, Expression, Disc, Args...)`: Same as `FUNCTION` paramerters, in addition to:
     1.	Disc: A dicriminator, to distiguish between overloaded methods.
--	`FUNC(Name, ReturnType, Signature, SubFn, Args...)`: Same as `FUNCTION` macro paramerters.
+-	`FUNCTION_OVERLOAD_CONST(Name, ReturnType, Signature, Expression, Disc, Args...)`: Same as `FUNCTION_OVERLOAD` paramerters.
+-	`FUNC(Name, ReturnType, Signature, SubFn, Args...)`: Same as `FUNCTION` paramerters except:
+    1. SubFn: Instead of default `Expression` in other variations, this is a function pointer where the function is the default behaviour.
 
 -	`END_MOCK(MockClass)`: 
     1.  MockClass: Mock class name (optional parameter).
-
-
-### Template Macros
-| Macro | Purpose |
-|-------|----------|
-| `START_MOCK_TEMPLATE(MockClass, TargetClass, Types...)` | Begin template mock |
-| `FUNCTION_TEMPLATE(FuncName,ReturnType, Signature, Expression, Args...)` | Mock template method |
-| `FUNCTION_TEMPLATE_CONST(FuncName,ReturnType, Signature, Expression, Args...)` | Mock const template method |
-| `FUNCTION_TEMPLATE_OVERLOADING(FuncName,ReturnType, Signature, Expression, Disc, Args...)` | Overloaded template mock |
-| `FUNCTION_TEMPLATE_OVERLOADING_CONST(FuncName,ReturnType, Signature, Expression, Disc, Args...)` | Const overloaded template mock |
-
-#### Template Macros Parameters
-
-All parameters are same as core macros paramerters, except:
-
-- Types: In `START_MOCK_TEMPLATE` this variable parameters are the template types.
-- Expression: In `FUNCTION_TEMPLATE*` macros, instead of `SubFn` in core macros, this expression is the default function template behaviour, 
-
 
 ### Generated Methods
 For each mocked method `Fx`, Mockingbird generates:
@@ -95,9 +85,9 @@ For each mocked method `Fx`, Mockingbird generates:
   - The mocked method has **more than 20 parameters**, or
   - The mocked method has an **rvalue reference parameter** (`T&&`).
 
-  In these cases, you must use `FUNCTION` or `FUNCTION_OVERLOADING` instead.
+  In those 2 cases, `FUNCTION`, `FUNCTION_CONST`, `FUNCTION_OVERLOAD` or `FUNCTION_OVERLOAD_CONST` to be used instead.
 
-- If no substitute is injected, the **dummy function** (or the **Expression** in template case) in the fixture is used.
+- If no substitute is injected, the **Expression** or **SubFn** in the fixture is the default behaviour.
 - Non-virtual methods, when hidden, **lose polymorphism**.
 - Injected lambdas **cannot have captures**.
 - The [Mockingbird extension](https://marketplace.visualstudio.com/items?itemName=MouazChamieh.mockingbirdextension) can auto-generate mocks using AI.
@@ -108,33 +98,35 @@ For each mocked method `Fx`, Mockingbird generates:
 
 ### 1️⃣ Basic Example
 ```cpp
-struct MyStruct { int x, y; };
+struct MyStruct 
+{ 
+    int x = 0; 
+    int y = 0; 
+};
 
 class Foo {
 public:
     virtual const MyStruct CreateMyStruct(int x, int y) { return {x, y}; }
 };
 
-const MyStruct CreateMyStructDummy(int x, int y) { return {0, 0}; }
-
 START_MOCK(FooMock, Foo)
-    FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDummy, x, y)
+    FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), return MyStruct{}, x, y)
 END_MOCK(FooMock)
 ```
 
-In tests:
+**In Tests**:
 ```cpp
 FooMock fooMock;
 fooMock.InjectCreateMyStruct([](int x, int y){ return MyStruct{x+10, y+10}; });
 
 auto result = fooMock.CreateMyStruct(5, 5);
-EXPECT_EQ(15, result.x);
-EXPECT_EQ(15, result.y);
+assert(15 == result.x);
+assert(15 == result.y);
 ```
 
 ---
 
-### 2️⃣ Comprehensive Example (Overloading, Call Counters, Spying)
+### 2️⃣ Comprehensive FUNCTION* Macro Example
 
 **Foo Class**
 ```cpp
@@ -154,22 +146,14 @@ public:
 
 **Mock Definition**:
 ```cpp
-void ResetMyStructDefault(MyStruct& myStruct) {}
-const MyStruct CreateMyStructDefault(int x, int y) { return MyStruct{ 0,0 }; }
-const MyStruct CreateMyStructDefault1(int x) { return MyStruct{ 0,0 }; }
-MyStruct MakeSpecialCopyMyStructDefault(const std::shared_ptr<MyStruct>& myStruct) { return MyStruct{ 0,0 }; }
-MyStruct MakeSpecialCopyMyStructDefault1(const MyStruct& myStruct) { return MyStruct{ 0,0 }; }
-MyStruct MakeSpecialCopyMyStructDefault2(MyStruct&& myStruct) { return MyStruct{ 0,0 }; }
-std::string GetStringDefault() { return ""; }
-
 START_MOCK(FooMock, Foo)
-    FUNC(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructDefault, myStruct)
-    FUNC(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDefault, x, y)
-    FUNC(CreateMyStruct, const MyStruct, (int x), &CreateMyStructDefault1, x)
-    FUNC(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStructPtr)const, &MakeSpecialCopyMyStructDefault, myStructPtr)
-    FUNC(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct)const, &MakeSpecialCopyMyStructDefault1, myStruct)
-    FUNCTION(MakeSpecialCopyMyStruct, MyStruct, (MyStruct&& myStructRLR)const, &MakeSpecialCopyMyStructDefault2, std::move(myStructRLR))
-    FUNC(GetString, std::string, (), &GetStringDefault)
+    FUNCTION(ResetMyStruct, void, (MyStruct& myStruct), return, myStruct)
+    FUNCTION(CreateMyStruct, const MyStruct, (int x, int y), return MyStruct{}, x, y)
+    FUNCTION_OVERLOAD(CreateMyStruct, const MyStruct, (int x), return MyStruct{}, OnlyX, x)
+    FUNCTION_CONST(MakeSpecialCopyMyStruct, MyStruct, (const MyStruct& myStruct), return MyStruct{}, myStruct)
+    FUNCTION_OVERLOAD_CONST(MakeSpecialCopyMyStruct, MyStruct, (const std::shared_ptr<MyStruct>& myStructPtr), return MyStruct{}, Shared, myStructPtr)
+    FUNCTION_OVERLOAD_CONST(MakeSpecialCopyMyStruct, MyStruct, (MyStruct&& myStructRLR), return MyStruct{}, RVRef, std::move(myStructRLR))
+    FUNCTION(GetString, std::string, (), return "")
 END_MOCK(FooMock)
 ```
 
@@ -179,39 +163,105 @@ FooMock fooMock;
 fooMock.InjectCreateMyStruct([](int x, int y){ return MyStruct{x+10, y+10}; });
 
 auto myStruct = fooMock.CreateMyStruct(5,5);
-EXPECT_EQ(15, myStruct.x);
-EXPECT_EQ(15, myStruct.y);
-EXPECT_EQ(1, fooMock.GetCreateMyStructCallCounter());
-EXPECT_EQ(10, fooMock.GetTen()); // Spy real implementation since not presented in the mock definition.
+assert(15 == myStruct.x);
+assert(15 == myStruct.y);
+assert(1 == fooMock.GetCreateMyStructCallCounter());
+assert(10 == fooMock.GetTen()); // Spy real implementation since not presented in the mock definition.
 ```
 
 ---
 
-### 3️⃣ Template Example
+### 3️⃣ FUNC Simplified Macro Example
+
+**Hoo Class**
+```cpp
+class Hoo {
+public:
+	virtual void ResetMyStruct(MyStruct& myStruct) = 0;
+	virtual const MyStruct CreateMyStruct(int x, int y) { return MyStruct{ x,y }; };
+	virtual const MyStruct CreateMyStruct(int x) const { return MyStruct{ x,x }; };
+	virtual ~Hoo() {}
+};
+```
+
+**Mock Definition**:
+```cpp
+
+void ResetMyStructDefault(MyStruct& myStruct) {}
+const MyStruct CreateMyStructDefault1(int x, int y) { return MyStruct{ 0,0 }; }
+const MyStruct CreateMyStructDefault2(int x) { return MyStruct{ 0,0 }; }
+
+START_MOCK(HooMock, Hoo)
+    FUNC(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructDefault, myStruct)
+    FUNC(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDefault1, x, y)
+    FUNC(CreateMyStruct, const MyStruct, (int x) const, &CreateMyStructDefault2, x)
+END_MOCK(HooMock)
+```
+
+**In Tests**:
+```cpp
+HooMock hooMock;
+
+hooMock.InjectCreateMyStruct_xy([](int x, int y) -> const MyStruct { return MyStruct{x+10, y+10}; });
+auto myStruct1 = hooMock.CreateMyStruct(5,0);
+assert(15 == myStruct1.x);
+assert(10 == myStruct1.y);
+assert(1 == hooMock.GetCreateMyStructCallCounter_xy());
+
+hooMock.InjectCreateMyStruct_x([](int x) -> const MyStruct { return MyStruct{x+100, x+100}; });
+auto myStruct2 = hooMock.CreateMyStruct(5);
+assert(105 == myStruct2.x);
+assert(105 == myStruct2.y);
+assert(1 == hooMock.GetCreateMyStructCallCounter_x());
+```
+---
+
+### 4️⃣ Template Example
 
 ```cpp
 template<class T, class E>
 class TemplatedFoo {
 public:
-    virtual T Sum(T x, E y) = 0;
-    virtual T Sum(T x, E y, T z) = 0;
-    virtual T SumConst(T x, E y) const = 0;
-    virtual T SumConst(T x, E y, int&& z) const = 0;
+	virtual T Sum(T x, E y) = 0;
+	virtual T Sum(T x, E y, T z) = 0;
+	virtual T SumConst(T x, E y) const = 0;
+	virtual T SumConst(T x, E y, int&& z) const = 0;
+	virtual ~TemplatedFoo() {}
 };
 
 START_MOCK_TEMPLATE(FooTemplatedMock, TemplatedFoo, T, E)
-    FUNCTION_TEMPLATE(Sum, T, (T x, E y), return 0, x, y)
-    FUNCTION_TEMPLATE_OVERLOADING(Sum, T, (T x, E y, T z), return 0, 1, x, y, z)
-    FUNCTION_TEMPLATE_CONST(SumConst, T, (T x, E y), return 0, x, y)
-    FUNCTION_TEMPLATE_OVERLOADING_CONST(SumConst, T, (T x, E y, int&& z), return 0, 1, x, y, std::move(z))
+    FUNCTION(Sum, T, (T x, E y), return T{}, x, y)
+    FUNCTION_OVERLOAD(Sum, T, (T x, E y, T z), return T{}, OverloadWithZ, x, y, z)
+    FUNCTION_CONST(SumConst, T, (T x, E y), return T{}, x, y)
+    FUNCTION_OVERLOAD_CONST(SumConst, T, (T x, E y, int&& z), return T{}, RvalRef, x, y, std::move(z))
 END_MOCK(FooTemplatedMock)
 ```
 
+**In Tests**:
+```cpp
+double sumMock1(double x, float y, double z) {
+	return x + y + z;
+}
+
+FooTemplatedMock<double, float> fooTemplatedMock;
+fooTemplatedMock.InjectSum(&sumMock1);
+
+auto sumMock2 = [](double x, float y) {return x + y; };
+fooTemplatedMock.InjectSum(sumMock2);
+fooTemplatedMock.InjectSumConst(sumMock2);
+
+auto sumMock3 = [](double x, float y, int&& z) {return x + y + z; };
+fooTemplatedMock.InjectSumConst(sumMock3);
+
+assert(2 == fooTemplatedMock.Sum(1,1)); 
+assert(4 == fooTemplatedMock.SumConst(2, 2)); 
+assert(3 == fooTemplatedMock.Sum(1, 1, 1));
+assert(6 == fooTemplatedMock.SumConst(1, 2, std::move(3)));
+```
 ---
 
 ## ⚠️ Limitations
 - Injected lambdas **cannot have captures**.
-- For methods with >20 parameters or rvalue refs, use `FUNCTION` / `FUNCTION_OVERLOADING` instead of `FUNC`.
 
 ---
 
