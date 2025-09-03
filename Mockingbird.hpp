@@ -10,6 +10,7 @@
 #define MOCKINGBIRD
 
 #include <functional>
+#include <list>
 
 #define ADD_TYPENAME1(x) typename x
 #define ADD_TYPENAME2(x1, x2) typename x1, ADD_TYPENAME1(x2) 
@@ -27,21 +28,33 @@
 template<ADD_TYPENAME(__VA_ARGS__)>                                                                                                   \
 class MockingClass : public MockedClass<__VA_ARGS__> {                          
 
+#define FUNCTION_BODY(Counter, Member, ...)                                                                                           \
+Counter++;                                                                                                                            \
+if(Member.m_call_once.empty())                                                                                                        \
+	return Member.m_func(__VA_ARGS__);                                                                                                \
+auto lastElem = Member.m_call_once.back();                                                                                            \
+Member.m_call_once.pop_back();                                                                                                        \
+return lastElem(__VA_ARGS__);
+
 #define FUNCTION_INJECTION_SET(FuncName, Substitute)                                                                                  \
 private:                                                                                                                              \
 template<class Type>                                                                                                                  \
-class FuncName##Class {                                                                                                               \
+class CONCAT(FuncName, Class) {                                                                                                       \
 	public:                                                                                                                           \
-		FuncName##Class():m_func((Type)Substitute){}                                                                                  \
+		CONCAT(FuncName, Class)():m_func((Type)Substitute){}                                                                          \
 		Type m_func;                                                                                                                  \
+        mutable std::list<Type> m_call_once;                                                                                          \
 };                                                                                                                                    \
-FuncName##Class<decltype(Substitute)> m_##FuncName##Class;                                                                            \
-mutable int m_##FuncName##CallCounter = 0;                                                                                            \
+CONCAT(FuncName, Class)<decltype(Substitute)> CONCAT(m_, FuncName, Class);                                                            \
+mutable int CONCAT(m_, FuncName, CallCounter) = 0;                                                                                    \
 public:                                                                                                                               \
-void Inject##FuncName(decltype(Substitute) sub){                                                                                      \
-m_##FuncName##Class.m_func = sub;                                                                                                     \
+void CONCAT(Inject, FuncName)(decltype(Substitute) sub){                                                                              \
+CONCAT(m_, FuncName, Class).m_func = sub;                                                                                             \
 }                                                                                                                                     \
-int Get##FuncName##CallCounter(){return m_##FuncName##CallCounter;                                                                    \
+void CONCAT(Inject, FuncName, CallOnce)(decltype(Substitute) sub){                                                                    \
+CONCAT(m_, FuncName, Class).m_call_once.push_front(sub);                                                                              \
+}                                                                                                                                     \
+int CONCAT(Get, FuncName, CallCounter)(){return CONCAT(m_, FuncName, CallCounter);                                                    \
 }
 
 #define FUNCTION_OVERLOAD_INJECTION_SET(FuncName, Substitute, Disc)                                                                   \
@@ -53,17 +66,10 @@ public:                                                                         
 void Inject##FuncName(decltype(Substitute) sub){                                                                                      \
 m_##FuncName##Class##Disc.m_func = sub;                                                                                               \
 }                                                                                                                                     \
-int Get##FuncName##Disc##CallCounter(){return m_##FuncName##Disc##CallCounter;}                                                                
-
-#define FUNCTION_CONST(FuncName, ReturnType, Signature, ExpressionWithoutCommas, .../*signature parameters*/)                         \
-private:                                                                                                                              \
-static ReturnType FuncName##Type Signature {ExpressionWithoutCommas;}                                                                 \
-FUNCTION_INJECTION_SET(FuncName, & FuncName##Type)                                                                                    \
-public:                                                                                                                               \
-ReturnType FuncName Signature const {                                                                                                 \
-m_##FuncName##CallCounter++;                                                                                                          \
-return m_##FuncName##Class.m_func(__VA_ARGS__);                                                                                       \
-}                                                                                       
+void Inject##FuncName##CallOnce(decltype(Substitute) sub){                                                                            \
+m_##FuncName##Class##Disc.m_call_once.push_front(sub);                                                                                \
+}                                                                                                                                     \
+int Get##FuncName##Disc##CallCounter(){return m_##FuncName##Disc##CallCounter;}
 
 #define START_MOCK(MockingClass, MockedClass)                                                                                         \
 class MockingClass : public MockedClass {                                                                                             
@@ -73,8 +79,16 @@ private:                                                                        
 static ReturnType FuncName##Type Signature {ExpressionWithoutCommas;}                                                                 \
 FUNCTION_INJECTION_SET(FuncName, & FuncName##Type)                                                                                    \
 ReturnType FuncName Signature {                                                                                                       \
-m_##FuncName##CallCounter++;                                                                                                          \
-return m_##FuncName##Class.m_func(__VA_ARGS__);                                                                                       \
+FUNCTION_BODY(m_##FuncName##CallCounter, m_##FuncName##Class, __VA_ARGS__)                                                            \
+}
+
+#define FUNCTION_CONST(FuncName, ReturnType, Signature, ExpressionWithoutCommas, .../*signature parameters*/)                         \
+private:                                                                                                                              \
+static ReturnType FuncName##Type Signature {ExpressionWithoutCommas;}                                                                 \
+FUNCTION_INJECTION_SET(FuncName, & FuncName##Type)                                                                                    \
+public:                                                                                                                               \
+ReturnType FuncName Signature const {                                                                                                 \
+FUNCTION_BODY(m_##FuncName##CallCounter, m_##FuncName##Class, __VA_ARGS__)                                                            \
 }
 
 #define FUNCTION_OVERLOAD(FuncName,ReturnType, Signature, ExpressionWithoutCommas, Disc, .../*signature parameters*/)                 \
@@ -82,8 +96,7 @@ private:                                                                        
 static ReturnType FuncName##Type##Disc Signature {ExpressionWithoutCommas;}                                                           \
 FUNCTION_OVERLOAD_INJECTION_SET(FuncName, & FuncName##Type##Disc, Disc)                                                               \
 ReturnType FuncName Signature {                                                                                                       \
-m_##FuncName##Disc##CallCounter++;                                                                                                    \
-return m_##FuncName##Class##Disc.m_func(__VA_ARGS__);                                                                                 \
+FUNCTION_BODY(m_##FuncName##Disc##CallCounter, m_##FuncName##Class##Disc, __VA_ARGS__)                                                \
 }
 
 #define FUNCTION_OVERLOAD_CONST(FuncName, ReturnType, Signature, ExpressionWithoutCommas, Disc, ...)                                  \
@@ -91,33 +104,13 @@ private:                                                                        
 static ReturnType FuncName##Type##Disc Signature {ExpressionWithoutCommas;}                                                           \
 FUNCTION_OVERLOAD_INJECTION_SET(FuncName, & FuncName##Type##Disc, Disc)                                                               \
 ReturnType FuncName Signature const {                                                                                                 \
-m_##FuncName##Disc##CallCounter++;                                                                                                    \
-return m_##FuncName##Class##Disc.m_func(__VA_ARGS__);                                                                                 \
-}
-
-#define FUNC_INJECTION_SET(FuncName, Params, Substitute)                                                                              \
-private:                                                                                                                              \
-template<class T>                                                                                                                     \
-class CONCAT(FuncName, _, Params) {                                                                                                   \
-	public:                                                                                                                           \
-		CONCAT(FuncName, _, Params)():m_func((T)Substitute){}                                                                         \
-		T m_func;                                                                                                                     \
-};                                                                                                                                    \
-CONCAT(FuncName, _, Params)<decltype(Substitute)> CONCAT(m_, FuncName, _,Params);                                                     \
-mutable int CONCAT(m_, FuncName, CallCounter, _, Params) = 0;                                                                         \
-                                                                                                                                      \
-public:                                                                                                                               \
-void CONCAT(Inject, FuncName, _, Params)(decltype(Substitute) sub){                                                                   \
-CONCAT(m_, FuncName, _,Params).m_func = sub;                                                                                          \
-}                                                                                                                                     \
-int CONCAT(Get, FuncName, CallCounter, _, Params)(){return CONCAT(m_, FuncName, CallCounter, _, Params);                              \
+FUNCTION_BODY(m_##FuncName##Disc##CallCounter, m_##FuncName##Class##Disc, __VA_ARGS__)                                                \
 }
 
 #define FUNC(FuncName,ReturnType, Signature, Substitute, .../*signature parameters*/)                                                 \
-FUNC_INJECTION_SET(FuncName, CONCAT(__VA_ARGS__) , Substitute)                                                                        \
+FUNCTION_INJECTION_SET(CONCAT(FuncName, _, __VA_ARGS__) , Substitute)                                                                 \
 ReturnType FuncName Signature {                                                                                                       \
-CONCAT(m_, FuncName, CallCounter, _, CONCAT(__VA_ARGS__))++;                                                                          \
-return CONCAT(m_, FuncName, _, __VA_ARGS__).m_func(__VA_ARGS__);                                                                      \
+FUNCTION_BODY(CONCAT(m_, FuncName, _, __VA_ARGS__, CallCounter), CONCAT(m_, FuncName, _, __VA_ARGS__, Class), __VA_ARGS__)            \
 }
 
 #define END_MOCK(MockingClass)                                                                                                        \

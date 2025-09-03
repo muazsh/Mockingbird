@@ -63,9 +63,14 @@ TEST(Mockingbird, Overloading) {
 	{
 		FooMock fooMock;
 		fooMock.InjectCreateMyStruct(CreateMyStructSubstitute); // Mocking methods injection.
+		fooMock.InjectCreateMyStructCallOnce([](int x, int y)->const MyStruct { return MyStruct{ 99, 99 }; });
 		auto createdMyStruct1 = fooMock.CreateMyStruct(10, 10);
-		EXPECT_EQ(20, createdMyStruct1.x);
-		EXPECT_EQ(20, createdMyStruct1.y);
+		EXPECT_EQ(99, createdMyStruct1.x);
+		EXPECT_EQ(99, createdMyStruct1.y);
+
+		auto createdMyStruct = fooMock.CreateMyStruct(10, 10);
+		EXPECT_EQ(20, createdMyStruct.x);
+		EXPECT_EQ(20, createdMyStruct.y);
 
 		auto createMyStructSubstitute = [](int x)->const MyStruct { return MyStruct{ x + 5, x + 5 }; };
 		fooMock.InjectCreateMyStruct(createMyStructSubstitute); // Mocking methods injection.
@@ -254,4 +259,52 @@ TEST(Mockingbird, Templates) {
 	EXPECT_EQ(3, fooTemplatedMock.GetSumOverloadWithZCallCounter());
 	EXPECT_EQ(6, fooTemplatedMock.SumConst(1, 2, std::move(3))); // Sum of 3 parameters
 	EXPECT_EQ(1, fooTemplatedMock.GetSumConstRvalRefCallCounter());
+}
+
+TEST(Mockingbird, CallOnce) {
+	FooMock fooMock;
+	fooMock.InjectCreateMyStructCallOnce([](int x, int y) -> const MyStruct {return MyStruct{ 10,10 }; }); // first call
+	fooMock.InjectCreateMyStructCallOnce([](int x, int y) -> const MyStruct {return MyStruct{ 20,20 }; }); // second call
+	fooMock.InjectCreateMyStruct([](int x, int y) -> const MyStruct {return MyStruct{ x, y }; }); // calls after second
+
+	auto fooMockFirstMyStruct = fooMock.CreateMyStruct(1, 2);
+	EXPECT_EQ(10, fooMockFirstMyStruct.x);
+	EXPECT_EQ(10, fooMockFirstMyStruct.y);
+
+	auto fooMockSecondMyStruct = fooMock.CreateMyStruct(1, 2);
+	EXPECT_EQ(20, fooMockSecondMyStruct.x);
+	EXPECT_EQ(20, fooMockSecondMyStruct.y);
+
+	auto fooMockThirdMyStruct = fooMock.CreateMyStruct(1, 2);
+	EXPECT_EQ(1, fooMockThirdMyStruct.x);
+	EXPECT_EQ(2, fooMockThirdMyStruct.y);
+
+
+	FooMock2 fooMock2;
+	fooMock2.InjectCreateMyStruct_xyCallOnce([](int x, int y) -> const MyStruct {return MyStruct{ 10,10 }; });
+	fooMock2.InjectCreateMyStruct_xyCallOnce([](int x, int y) -> const MyStruct {return MyStruct{ 20,20 }; });
+	fooMock2.InjectCreateMyStruct_xy([](int x, int y) -> const MyStruct {return MyStruct{ x, y }; });
+
+	auto fooMock2FirstMyStruct = fooMock2.CreateMyStruct(1, 2);
+	EXPECT_EQ(10, fooMock2FirstMyStruct.x);
+	EXPECT_EQ(10, fooMock2FirstMyStruct.y);
+
+	auto fooMock2SecondMyStruct = fooMock2.CreateMyStruct(1, 2);
+	EXPECT_EQ(20, fooMock2SecondMyStruct.x);
+	EXPECT_EQ(20, fooMock2SecondMyStruct.y);
+
+	auto fooMock2ThirdMyStruct = fooMock2.CreateMyStruct(1, 2);
+	EXPECT_EQ(1, fooMock2ThirdMyStruct.x);
+	EXPECT_EQ(2, fooMock2ThirdMyStruct.y);
+
+
+	FooTemplatedMock<double, float> fooTemplatedMock;
+	fooTemplatedMock.InjectSumCallOnce([](double x, float y) {return 10.0; });
+	fooTemplatedMock.InjectSumCallOnce([](double x, float y) {return 20.0; });
+	fooTemplatedMock.InjectSum([](double x, float y) {return x + y; });
+	
+	EXPECT_EQ(10.0, fooTemplatedMock.Sum(0, 0));
+	EXPECT_EQ(20.0, fooTemplatedMock.Sum(0, 0));
+	EXPECT_EQ(7.0, fooTemplatedMock.Sum(2, 5));
+
 }

@@ -10,10 +10,12 @@ Mockingbird equipes the created mock with mechanism to inject new behaviours in 
 
 ## Features
 -  Cross-platform, works with **all C++11+ compilers** (this github pipeline runs tests against MSVC, GCC, Clang).
--  Mock any **virtual** method and hide **non-virtual** ones.
+-  Mock **virtual** methods and hide **non-virtual** ones.
+-  Mock **const** and **overloaded** methods.
+-  Set different behaviours for the first **n** mock calls.
 -  Call counters for every mocked method.
 -  Spying on original implementations supported.
--  Header-only (`Mockingbird.hpp`, ~130 LoC).
+-  Header-only (`Mockingbird.hpp`, ~120 LoC).
 -  Full **class template mocking** support.
 -  Can be integrated with any testing framework like Catch2, gtest and Microsoft Unit Testing Framework.
 -  No macros in tests, macros are used only to define the mock class.
@@ -74,9 +76,10 @@ When building using MSVC, the standard conforming preprocessor should be incorpo
 
 ### Generated Methods
 For each mocked method `Fx`, Mockingbird generates:
-1. `Fx(...)` → The mock method.
+1. `Fx(...)` → The override/hide mock method.
 2. `InjectFx(...)` → Inject substitute function/lambda.
-3. `GetFxCallCounter()` → Retrieve number of calls.
+3. `InjectFxCallOnce` → Inject substitute function/lambda to be called once, calling it `n` times causes calling these injections for the first `n` `Fx` calls in the injection order. 
+4. `GetFxCallCounter()` → Retrieve number of calls.
 
 ---
 
@@ -117,11 +120,26 @@ END_MOCK(FooMock)
 **In Tests**:
 ```cpp
 FooMock fooMock;
-fooMock.InjectCreateMyStruct([](int x, int y){ return MyStruct{x+10, y+10}; });
 
-auto result = fooMock.CreateMyStruct(5, 5);
-assert(15 == result.x);
-assert(15 == result.y);
+auto beforeInjection = fooMock.CreateMyStruct(5, 5); // returns default MyStruct{}
+assert(0 == beforeInjection.x);
+assert(0 == beforeInjection.y);
+
+fooMock.InjectCreateMyStructCallOnce([](int x, int y) -> const MyStruct {return MyStruct{ 10,10 }; }); // injection for the first call
+fooMock.InjectCreateMyStructCallOnce([](int x, int y) -> const MyStruct {return MyStruct{ 20,20 }; }); // injection for the second call
+fooMock.InjectCreateMyStruct([](int x, int y) -> const MyStruct {return MyStruct{ x + 10, y + 10 }; }); // injection for calls after second
+
+auto firstMyStruct = fooMock.CreateMyStruct(5, 5);
+assert(10 == firstMyStruct.x);
+assert(10 == firstMyStruct.y);
+
+auto secondMyStruct = fooMock.CreateMyStruct(5, 5);
+assert(20 == secondMyStruct.x);
+assert(20 == secondMyStruct.y);
+
+auto thirdMyStruct = fooMock.CreateMyStruct(5, 5);
+assert(15 == thirdMyStruct.x);
+assert(15 == thirdMyStruct.y);
 ```
 
 ---
@@ -272,9 +290,3 @@ assert(6 == fooTemplatedMock.SumConst(1, 2, std::move(3)));
 
 ## 🤝 Contributing
 Contributions, issues, and feature requests are welcome!
-
-
-
-
-
-
