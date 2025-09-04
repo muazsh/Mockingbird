@@ -4,21 +4,22 @@
 
 A **lightweight, simple and powerful mocking framework for C++11 and above**.
 
-Mockingbird equipes the created mock with mechanism to inject new behaviours in runtime instead of the target class methods. 
+Mockingbird equipes the created mock with mechanism to inject new behaviors in runtime instead of the target class methods. 
 
 ---
 
 ## Features
+-  **Header-only** (`Mockingbird.hpp`, ~100 LoC).
 -  Cross-platform, works with **all C++11+ compilers** (this github pipeline runs tests against MSVC, GCC, Clang).
 -  Mock **virtual** methods and hide **non-virtual** ones.
 -  Mock **const** and **overloaded** methods.
--  Set different behaviours for the first **n** mock calls.
--  Call counters for every mocked method.
--  Spying on original implementations supported.
--  Header-only (`Mockingbird.hpp`, ~100 LoC).
+-  Set **different behaviors** for the first **n** mock calls.
+-  Call **counters** for every mocked method.
+-  **Spying** on original implementations supported.
+-  **Multiple inheritance** mock.
 -  Full **class template mock** support.
--  Can be integrated with any testing framework like Catch2, gtest and Microsoft Unit Testing Framework.
--  No macros in tests, macros are used only to define the mock class.
+-  Can be **integrated** with any testing framework like Catch2, gtest and Microsoft Unit Testing Framework.
+-  **No macros** in tests, macros are used only to define the mock class.
 
 ---
 
@@ -46,14 +47,13 @@ When building using MSVC, the standard conforming preprocessor should be incorpo
 | `START_MOCK_TEMPLATE` | Begin class template mock definition | Must be first macro in case of class template mock |
 | `FUNCTION` | Mock a method | Works when no overloading yet |
 | `FUNCTION_OVERLOAD` | Mock an overloaded method | Requires overload discriminator |
-| `FUNC` | Shortcut for `FUNCTION` and `FUNCTION_OVERLOAD` | no rvalue refs params |
 | `END_MOCK` | End mock definition | Must be last macro |
 
 #### Macros Parameters
 
--	`START_MOCK(MockClass, TargetClass)`: 
+-	`START_MOCK(MockClass, TargetClasses...)`: 
     1.  MockClass: Mock class name.
-    2.  TargetClass: Target class name.
+    2.  TargetClasses: Target classes names (might be many in case of multiple inheritance).
 -	`START_MOCK_TEMPLATE(MockClass, TargetClass, Types...)`: Same as `START_MOCK` parameters, in addition to: 
     1.  Types: Variable arguments represent the template types.
 -	`FUNCTION(Name, ReturnType, Signature, Const, Override, Expression, Args...)`:
@@ -66,13 +66,6 @@ When building using MSVC, the standard conforming preprocessor should be incorpo
     7.	Args: The signature parameters names separated by commas.    
 -	`FUNCTION_OVERLOAD(Name, ReturnType, Signature, Expression, Disc, Args...)`: Same as `FUNCTION` paramerters, in addition to:
     1.	Disc: A dicriminator, to distiguish between overloaded methods.
--	`FUNC(Name, ReturnType, Signature, SubFn, Args...)`:
-    1.	Name: The Method name.
-    2.	ReturnType: Method return type.
-    3.	Signature: Method signature surrounded by parentheses, and followed by `const`/`override` if the method is const or override.
-    4.  SubFn: Instead of default `Expression` in `FUNCTION*` variations, this is a function pointer where the function is the default behaviour.
-    5.	Args: The signature parameters names separated by commas.
-
 -	`END_MOCK(MockClass)`: 
     1.  MockClass: Mock class name (optional parameter).
 
@@ -86,7 +79,6 @@ For each mocked method `Fx`, Mockingbird generates:
 ---
 
 ## 📌 Important Notes
-- `FUNC` **cannot** be used when the mocked method has an **rvalue reference parameter** (`T&&`). In this case, `FUNCTION` or `FUNCTION_OVERLOAD` to be used instead.
 - If no substitute is injected, the **Expression** or **SubFn** in the fixture is the default behaviour.
 - Non-virtual methods, when hidden, **lose polymorphism**.
 - Injected lambdas **cannot have captures**.
@@ -183,55 +175,9 @@ assert(15 == myStruct.y);
 assert(1 == fooMock.GetCreateMyStructCallCounter());
 assert(10 == fooMock.GetTen()); // Spy real implementation since not presented in the mock definition.
 ```
-
 ---
 
-### 3️⃣ FUNC Simplified Macro Example
-
-**Hoo Class**
-```cpp
-class Hoo {
-public:
-	virtual void ResetMyStruct(MyStruct& myStruct) = 0;
-	virtual const MyStruct CreateMyStruct(int x, int y) { return MyStruct{ x,y }; };
-	virtual const MyStruct CreateMyStruct(int x) const { return MyStruct{ x,x }; };
-	virtual ~Hoo() {}
-};
-```
-
-**Mock Definition**:
-```cpp
-
-void ResetMyStructDefault(MyStruct& myStruct) {}
-const MyStruct CreateMyStructDefault1(int x, int y) { return MyStruct{ 0,0 }; }
-const MyStruct CreateMyStructDefault2(int x) { return MyStruct{ 0,0 }; }
-
-START_MOCK(HooMock, Hoo)
-    FUNC(ResetMyStruct, void, (MyStruct& myStruct), &ResetMyStructDefault, myStruct)
-    FUNC(CreateMyStruct, const MyStruct, (int x, int y), &CreateMyStructDefault1, x, y)
-    FUNC(CreateMyStruct, const MyStruct, (int x) const, &CreateMyStructDefault2, x)
-END_MOCK(HooMock)
-```
-
-**In Tests**:
-```cpp
-HooMock hooMock;
-
-hooMock.InjectCreateMyStruct_xy([](int x, int y) -> const MyStruct { return MyStruct{x+10, y+10}; });
-auto myStruct1 = hooMock.CreateMyStruct(5,0);
-assert(15 == myStruct1.x);
-assert(10 == myStruct1.y);
-assert(1 == hooMock.GetCreateMyStructCallCounter_xy());
-
-hooMock.InjectCreateMyStruct_x([](int x) -> const MyStruct { return MyStruct{x+100, x+100}; });
-auto myStruct2 = hooMock.CreateMyStruct(5);
-assert(105 == myStruct2.x);
-assert(105 == myStruct2.y);
-assert(1 == hooMock.GetCreateMyStructCallCounter_x());
-```
----
-
-### 4️⃣ Template Example
+### 3️⃣ Template Example
 
 ```cpp
 template<class T, class E>
