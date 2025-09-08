@@ -56,7 +56,7 @@ int Get##FuncName##CallCounter(){return m_##FuncName##CallCounter;              
 #define FUNCTION_OVERLOAD_INJECTION_SET(FuncName, Substitute, Disc)                                                                   \
 private:                                                                                                                              \
 FuncName##Class<decltype(Substitute)> m_##FuncName##Class##Disc;                                                                      \
-mutable int m_##FuncName##Disc##CallCounter = 0;                                                                                      \
+mutable unsigned m_##FuncName##Disc##CallCounter = 0;                                                                                 \
                                                                                                                                       \
 public:                                                                                                                               \
 void Inject##FuncName(decltype(Substitute) sub){                                                                                      \
