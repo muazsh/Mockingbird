@@ -12,13 +12,12 @@
 #include <functional>
 #include <list>
 
+#define SELECT_MACRO(_1, _2, _3, _4, _5, NAME, ...) NAME
 #define PREPEND_EXPR1(expr, x) expr x
 #define PREPEND_EXPR2(expr, x1, x2) expr x1, PREPEND_EXPR1(expr, x2) 
 #define PREPEND_EXPR3(expr, x1, x2, x3) expr x1, PREPEND_EXPR2(expr, x2, x3) 
 #define PREPEND_EXPR4(expr, x1, x2, x3, x4) expr x1, PREPEND_EXPR3(expr, x2, x3, x4) 
 #define PREPEND_EXPR5(expr, x1, x2, x3, x4, x5) expr x1, PREPEND_EXPR4(expr, x2, x3, x4, x5)
-
-#define SELECT_MACRO(_1, _2, _3, _4, _5, NAME, ...) NAME
 #define PREPEND_EXPR(expr, ...) SELECT_MACRO(__VA_ARGS__, PREPEND_EXPR5, PREPEND_EXPR4, PREPEND_EXPR3, PREPEND_EXPR2, PREPEND_EXPR1)(expr, __VA_ARGS__)
 
 #define START_MOCK_TEMPLATE(MockingClass, MockedClass, ...)                                                                           \
@@ -43,7 +42,7 @@ class FuncName##Class {                                                         
         mutable std::list<Type> m_CallOnce;                                                                                           \
 };                                                                                                                                    \
 FuncName##Class<decltype(Substitute)> m_##FuncName##Class;                                                                            \
-mutable int m_##FuncName##CallCounter = 0;                                                                                            \
+mutable unsigned m_##FuncName##CallCounter = 0;                                                                                       \
 public:                                                                                                                               \
 void Inject##FuncName(decltype(Substitute) sub){                                                                                      \
 m_##FuncName##Class.m_Func = sub;                                                                                                     \
