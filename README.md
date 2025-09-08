@@ -15,9 +15,9 @@ Mockingbird equipes the created mock with mechanism to inject new behaviors in r
 -  Mock **const** and **overloaded** methods.
 -  Set **different behaviors** for the first **n** mock calls.
 -  Call **counters** for every mocked method.
--  **Spying** on original implementations supported.
+-  **Spying** on original implementations.
 -  **Multiple inheritance** mock.
--  Full **class template mock** support.
+-  Class **template** mock.
 -  Can be **integrated** with any testing framework like Catch2, gtest and Microsoft Unit Testing Framework.
 -  **No macros** in tests, macros are used only to define the mock class.
 
@@ -44,18 +44,16 @@ When building using MSVC, the standard conforming preprocessor should be incorpo
 | Macro | Purpose | Notes |
 |-------|----------|-------|
 | `START_MOCK` | Begin mock definition | Must be first macro |
-| `START_MOCK_TEMPLATE` | Begin class template mock definition | Must be first macro in case of class template mock |
 | `FUNCTION` | Mock a method | Works when no overloading yet |
 | `FUNCTION_OVERLOAD` | Mock an overloaded method | Requires overload discriminator |
 | `END_MOCK` | End mock definition | Must be last macro |
+| `START_MOCK_TEMPLATE` | Begin class template mock definition | Must be first macro in case of class template mock |
 
 #### Macros Parameters
 
 -	`START_MOCK(MockClass, TargetClasses...)`: 
     1.  MockClass: Mock class name.
     2.  TargetClasses: Target classes names (might be many in case of multiple inheritance).
--	`START_MOCK_TEMPLATE(MockClass, TargetClass, Types...)`: Same as `START_MOCK` parameters, in addition to: 
-    1.  Types: Variable arguments represent the template types.
 -	`FUNCTION(Name, ReturnType, Signature, Const, Override, Expression, Args...)`:
     1.	Name: The Method name.
     2.	ReturnType: Method return type.
@@ -68,6 +66,8 @@ When building using MSVC, the standard conforming preprocessor should be incorpo
     1.	Disc: A dicriminator, to distiguish between overloaded methods.
 -	`END_MOCK(MockClass)`: 
     1.  MockClass: Mock class name (optional parameter).
+-	`START_MOCK_TEMPLATE(MockClass, TargetClass, Types...)`: Same as `START_MOCK` parameters, in addition to: 
+    1.  Types: Variable arguments represent the template types.
 
 ### Generated Methods
 For each mocked method `Fx`, Mockingbird generates:
@@ -79,7 +79,7 @@ For each mocked method `Fx`, Mockingbird generates:
 ---
 
 ## 📌 Important Notes
-- If no substitute is injected, the **Expression** or **SubFn** in the fixture is the default behaviour.
+- If no substitute is injected, the **Expression** in the fixture is the default behaviour.
 - Non-virtual methods, when hidden, **lose polymorphism**.
 - Injected lambdas **cannot have captures**.
 - The [Mockingbird extension](https://marketplace.visualstudio.com/items?itemName=MouazChamieh.mockingbirdextension) can auto-generate mocks using AI.
@@ -133,7 +133,7 @@ assert(15 == thirdMyStruct.y);
 
 ---
 
-### 2️⃣ Comprehensive FUNCTION* Macro Example
+### 2️⃣ Comprehensive Example
 
 **Foo Class**
 ```cpp
