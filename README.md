@@ -23,7 +23,7 @@ Mockingbird equipes the created mock with mechanism to inject new behaviors in r
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Installation
 Just copy [`Mockingbird.hpp`](./Mockingbird.hpp) into your project and include it:
@@ -38,7 +38,7 @@ When building using MSVC, the standard conforming preprocessor should be incorpo
 
 ---
 
-## 📘 API Reference
+## API Reference
 
 ### Macros
 | Macro | Purpose | Notes |
@@ -78,7 +78,7 @@ For each mocked method `Fx`, Mockingbird generates:
 
 ---
 
-## 📌 Important Notes
+## Important Notes
 - If no substitute is injected, the **Expression** in the fixture is the default behaviour.
 - Non-virtual methods, when hidden, **lose polymorphism**.
 - Injected lambdas **cannot have captures**.
@@ -86,9 +86,9 @@ For each mocked method `Fx`, Mockingbird generates:
 
 ---
 
-## 📑 Usage Examples
+## Usage Examples
 
-### 1️⃣ Basic Example
+### Basic Example
 ```cpp
 struct MyStruct 
 { 
@@ -133,7 +133,7 @@ assert(15 == thirdMyStruct.y);
 
 ---
 
-### 2️⃣ Comprehensive Example
+### Comprehensive Example
 
 **Foo Class**
 ```cpp
@@ -177,7 +177,7 @@ assert(10 == fooMock.GetTen()); // Spy real implementation since not presented i
 ```
 ---
 
-### 3️⃣ Template Example
+### Template Example
 
 ```cpp
 template<class T, class E>
@@ -221,15 +221,15 @@ assert(6 == fooTemplatedMock.SumConst(1, 2, std::move(3)));
 ```
 ---
 
-## ⚠️ Limitations
+## Limitations
 - Injected lambdas **cannot have captures**.
 
 ---
 
-## 🔧 Tooling
+## Tooling
 - [Visual Studio Extension (auto-mock generator)](https://marketplace.visualstudio.com/items?itemName=MouazChamieh.mockingbirdextension)
 
 ---
 
-## 🤝 Contributing
+## Contributing
 Contributions, issues, and feature requests are welcome!
